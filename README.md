@@ -35,7 +35,7 @@ In bash install extra packages. Link to [libboost](https://packages.debian.org/j
 ```
 apt-get update
 apt-get dist-upgrade
-# Should be build instead: apt-get install libboost-all-dev
+apt-get install libboost-all-dev
 apt-get install automake autoconf libtool
 ```
 
@@ -60,6 +60,8 @@ ldconfig
 ```
 
 ## Build QuantLib with Boost and Emscripten
+
+How to use emconfigure and emmake, [see](https://emscripten.org/docs/compiling/Building-Projects.html)
 
 ```
 cd QuantLib-1.15
@@ -165,4 +167,35 @@ int main() {
 QUANTLIB=/src/QuantLib-1.15
 cd QuantLib-1.15/Examples/BermudanSwaption/
 emcc BermudanSwaption.cpp -o BermudanSwaption.js -std=c++11 -I${BOOST} -L${BOOST}/lib/emscripten -I${QUANTLIB} -I${QUANTLIB}/ql
+```
+
+Builds .o-file (LLVM bitcode):
+
+```
+emcc -DHAVE_CONFIG_H -I. -I../../ql  -I../.. -I../.. -I/src/boost_1_70_0  -g -O2 -MT BermudanSwaption.o -MD -MP -MF .deps/BermudanSwaption.Tpo -c -o BermudanSwaption.o BermudanSwaption.cpp
+```
+
+[gcc arguments](http://tigcc.ticalc.org/doc/comopts.html)
+[emcc arguments](https://emscripten.org/docs/tools_reference/emcc.html)
+
+```
+emcc -I. -I../../ql -I../.. -I${BOOST} -L${BOOST}/lib/emscripten -O2 -MT BermudanSwaption.o -MD -MP -o BermudanSwaption.js BermudanSwaption.cpp
+emcc -I. -I../../ql -I../.. -I${BOOST} -L${BOOST}/lib/emscripten -O2 -o hello-boost.js hello-boost.cpp
+```
+
+Output from `make install`
+
+```
+/bin/bash ../libtool --mode=install /usr/bin/install -c libQuantLib.la '/usr/local/lib'
+libtool: install: /usr/bin/install -c .libs/libQuantLib.so.0.0.0 /usr/local/lib/libQuantLib.so.0.0.0
+libtool: install: (cd /usr/local/lib && { ln -s -f libQuantLib.so.0.0.0 libQuantLib.so.0 || { rm -f libQuantLib.so.0 && ln -s libQuantLib.so.0.0.0 libQuantLib.so.0; }; })
+libtool: install: (cd /usr/local/lib && { ln -s -f libQuantLib.so.0.0.0 libQuantLib.so || { rm -f libQuantLib.so && ln -s libQuantLib.so.0.0.0 libQuantLib.so; }; })
+libtool: install: /usr/bin/install -c .libs/libQuantLib.lai /usr/local/lib/libQuantLib.la
+libtool: install: /usr/bin/install -c .libs/libQuantLib.a /usr/local/lib/libQuantLib.a
+libtool: install: chmod 644 /usr/local/lib/libQuantLib.a
+libtool: install: /emsdk_portable/sdk/emranlib /usr/local/lib/libQuantLib.a
+libtool: finish: PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/sbin" ldconfig -n /usr/local/lib
+ldconfig: /usr/local/lib/libQuantLib.so.0.0.0 is not an ELF file - it has the wrong magic bytes at the start.
+ldconfig: /usr/local/lib/libQuantLib.so.0 is not an ELF file - it has the wrong magic bytes at the start.
+ldconfig: /usr/local/lib/libQuantLib.so is not an ELF file - it has the wrong magic bytes at the start.
 ```
