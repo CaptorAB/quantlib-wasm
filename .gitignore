@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Web assemblies
+*.wasm
+
+*.gz
+*.bz2
