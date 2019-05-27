@@ -1,6 +1,7 @@
 # @captor/node-quantlib
 
 install
+
 ```bash
 npm install @captor/node-quantlib
 ```
@@ -8,13 +9,10 @@ npm install @captor/node-quantlib
 @captor/node-quantlib is a wrapper in NodeJS of [Quantlib](https://www.quantlib.org/) compiled with
 [webassembly](https://webassembly.org/)
 
-
 ## Versioning
 
-@captor/node-quantlib does not follow https://semver.org/, but the version from [Quantlib](https://www.quantlib.org/) 
+@captor/node-quantlib does not follow https://semver.org/, but the version from [Quantlib](https://www.quantlib.org/)
 with an extra number to version the @captor/node-quantlib package.
-
-
 
 ## Development
 
@@ -67,15 +65,17 @@ apt-get -y install automake autoconf libtool
 [Testing Emscripten with C++11 and Boost](https://gist.github.com/arielm/69a7488172611e74bfd4)
 
 ```
+cd /tmp
 wget -c https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2
-tar --bzip2 -xf boost_1_70_0.tar.bz2
+mkdir /boost
+tar --bzip2 -xf boost_1_70_0.tar.bz2 -C /boost --strip-components=1
 ```
 
 ### Build Boost with Emscripten
 
-```
+```bash
 EMSCRIPTEN=/emsdk_portable/sdk
-BOOST=/src/boost_1_70_0
+BOOST=/boost
 
 cd $EMSCRIPTEN
 ./embuilder.py build zlib
@@ -95,7 +95,7 @@ unset NO_BZIP2
 
 ### Build a Boost hello world
 
-```
+```bash
 EMSCRIPTEN=/emsdk_portable/sdk
 BOOST=/src/boost_1_70_0
 cd TestingBoost
@@ -106,10 +106,11 @@ c++ -I${BOOST} boost-hello-world.cpp -o boost-hello-world
 
 In the container (bash). See [QuantLib on Linux](https://www.quantlib.org/install/linux.shtml):
 
-```
+```bash
 wget https://bintray.com/quantlib/releases/download_file?file_path=QuantLib-1.15.tar.gz -O QuantLib-1.15.tar.gz
-tar xzf QuantLib-1.15.tar.gz
-cd QuantLib-1.15
+tar xzf QuantLib-1.15.tar.gz -C /quantlib
+QUANTLIB=/quantlib
+cd $QUANTLIB
 ```
 
 ### Build QuantLib (with default Boost and without Emscripten)
@@ -128,8 +129,8 @@ How to use emconfigure and emmake, [see](https://emscripten.org/docs/compiling/B
 Also a good [guide](https://adamrehn.com/articles/creating-javascript-bindings-for-c-cxx-libraries-with-emscripten/)
 
 ```
-cd QuantLib-1.15
-BOOST=/src/boost_1_70_0
+cd $QUANTLIB
+BOOST=/boost
 emconfigure ./configure --with-boost-include=${BOOST} --with-boost-lib=${BOOST}/lib/emscripten
 emmake make
 emmake make install
@@ -141,7 +142,7 @@ ldconfig
 Build using `Dockerfile` in the same folder.
 
 ```
-docker build -t quantlib/emscripten .
+docker build -t docker.io/captorab/emscripten-quantlib:1.15.1 .
 ```
 
 Run it (update the container id):
@@ -245,4 +246,26 @@ Adding the right lib solves the problem:
 
 ```
 emcc -I${QUANTLIB} -I${BOOST} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+```
+
+## BINARYEN_TRAP_MODE=clamp
+
+This runtime error is handled with `BINARYEN_TRAP_MODE=clamp`
+
+```
+exception thrown: RuntimeError: float unrepresentable in integer range,RuntimeError: float unrepresentable in integer range
+    at wasm-function[2063]:2701
+    at wasm-function[1140]:1436
+    at wasm-function[108]:1861
+    at Object.Module._main (C:\Projects\Nodejs\test\test190425\BermudanSwaption.js:6006:33)
+    at Object.callMain (C:\Projects\Nodejs\test\test190425\BermudanSwaption.js:6346:30)
+    at doRun (C:\Projects\Nodejs\test\test190425\BermudanSwaption.js:6404:60)
+    at run (C:\Projects\Nodejs\test\test190425\BermudanSwaption.js:6418:5)
+    at runCaller (C:\Projects\Nodejs\test\test190425\BermudanSwaption.js:6323:29)
+    at removeRunDependency (C:\Projects\Nodejs\test\test190425\BermudanSwaption.js:1517:7)
+    at receiveInstance (C:\Projects\Nodejs\test\test190425\BermudanSwaption.js:1611:5)
+```
+
+```
+emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -s TOTAL_MEMORY=67108864 -o BermudanSwaption.js BermudanSwaption.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
