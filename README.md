@@ -1,27 +1,47 @@
-## Pull from docker
+# @captor/node-quantlib
+
+install
+```bash
+npm install @captor/node-quantlib
+```
+
+@captor/node-quantlib is a wrapper in NodeJS of [Quantlib](https://www.quantlib.org/) compiled with
+[webassembly](https://webassembly.org/)
+
+
+## Versioning
+
+@captor/node-quantlib does not follow https://semver.org/, but the version from [Quantlib](https://www.quantlib.org/) 
+with an extra number to version the @captor/node-quantlib package.
+
+
+
+## Development
+
+### Pull from docker
 
 ```
 docker pull trzeci/emscripten
 ```
 
-## Compile
+### Compile
 
 ```
 docker run --rm -v ${pwd}:/src -u emscripten trzeci/emscripten emcc helloworld.cpp -o helloworld.js --closure 1
 ```
 
-## Run
+### Run
 
 ```
 node helloworld.js
 ```
 
-## Windows only: Share folder
+### Windows only: Share folder
 
 Add a local user to the windows machine called `docker`.
 In Docker / Settings / Shared Drives, share the disk drive. Use the user `docker`.
 
-## Setup the Emscripten container (from docker trzeci/emscripten)
+### Setup the Emscripten container (from docker trzeci/emscripten)
 
 Start an emscripten container
 
@@ -41,7 +61,7 @@ apt-get -y dist-upgrade
 apt-get -y install automake autoconf libtool
 ```
 
-## Download and unzip Boost
+### Download and unzip Boost
 
 [Getting Started on Unix Variants](https://www.boost.org/doc/libs/1_70_0/more/getting_started/unix-variants.html)
 [Testing Emscripten with C++11 and Boost](https://gist.github.com/arielm/69a7488172611e74bfd4)
@@ -51,7 +71,7 @@ wget -c https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.b
 tar --bzip2 -xf boost_1_70_0.tar.bz2
 ```
 
-## Build Boost with Emscripten
+### Build Boost with Emscripten
 
 ```
 EMSCRIPTEN=/emsdk_portable/sdk
@@ -73,7 +93,7 @@ cp stage/lib/*.a lib/emscripten
 unset NO_BZIP2
 ```
 
-## Build a Boost hello world
+### Build a Boost hello world
 
 ```
 EMSCRIPTEN=/emsdk_portable/sdk
@@ -82,7 +102,7 @@ cd TestingBoost
 c++ -I${BOOST} boost-hello-world.cpp -o boost-hello-world
 ```
 
-## Download QuantLib
+### Download QuantLib
 
 In the container (bash). See [QuantLib on Linux](https://www.quantlib.org/install/linux.shtml):
 
@@ -92,7 +112,7 @@ tar xzf QuantLib-1.15.tar.gz
 cd QuantLib-1.15
 ```
 
-## Build QuantLib (with default Boost and without Emscripten)
+### Build QuantLib (with default Boost and without Emscripten)
 
 ```
 ./autogen.sh
@@ -102,7 +122,7 @@ make install
 ldconfig
 ```
 
-## Build QuantLib with Boost and Emscripten
+### Build QuantLib with Boost and Emscripten
 
 How to use emconfigure and emmake, [see](https://emscripten.org/docs/compiling/Building-Projects.html)
 Also a good [guide](https://adamrehn.com/articles/creating-javascript-bindings-for-c-cxx-libraries-with-emscripten/)
@@ -116,7 +136,7 @@ emmake make install
 ldconfig
 ```
 
-## Build and run quantlib/emscripten docker image
+### Build and run quantlib/emscripten docker image
 
 Build using `Dockerfile` in the same folder.
 
@@ -131,11 +151,11 @@ docker run -v ${pwd}:/src -it -d quantlib/emscripten /bin/bash
 docker exec -it ee5 /bin/bash
 ```
 
-## Compile emscripten with boost
+### Compile emscripten with boost
 
 [Using Boost with Emscripten](https://stackoverflow.com/questions/15724357/using-boost-with-emscripten)
 
-## Build Emscripten with Boost
+### Build Emscripten with Boost
 
 ```
 cd TestingEmscriptenWithC11AndBoost
@@ -164,7 +184,7 @@ int main() {
 }
 ```
 
-## Build BermudanSwaption example
+### Build BermudanSwaption example
 
 ```
 QUANTLIB=/src/QuantLib-1.15
@@ -210,7 +230,7 @@ emcc -I${QUANTLIB} -I${BOOST} -O2 -o hello-boost.js hello-boost.cpp
 emcc -I${QUANTLIB} -I${BOOST} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
 
-## Link error when building QuantLib with Emscripten
+### Link error when building QuantLib with Emscripten
 
 ```
 root@ee5ee9687d4f:/src# emcc -I${QUANTLIB} -I${BOOST} -O2 -o hello-quantlib.js hello-quantlib.cpp
