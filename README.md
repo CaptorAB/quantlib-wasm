@@ -269,3 +269,162 @@ exception thrown: RuntimeError: float unrepresentable in integer range,RuntimeEr
 ```
 emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -s TOTAL_MEMORY=67108864 -o BermudanSwaption.js BermudanSwaption.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
+
+## Build test examples
+
+### BermudanSwaption
+
+```
+emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -s TOTAL_MEMORY=67108864 -o BermudanSwaption.js BermudanSwaption.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+```
+
+Expected output:
+
+```
+> node BermudanSwaption.js
+
+G2 (analytic formulae) calibration
+1x5: model 10.04552 %, market 11.48000 % (-1.43448 %)
+2x4: model 10.51233 %, market 11.08000 % (-0.56767 %)
+3x3: model 10.70500 %, market 10.70000 % (+0.00500 %)
+4x2: model 10.83816 %, market 10.21000 % (+0.62816 %)
+5x1: model 10.94390 %, market 10.00000 % (+0.94390 %)
+calibrated to:
+a     = 0.050105, sigma = 0.0094504
+b     = 0.050109, eta   = 0.0094505
+rho   = -0.76333
+
+Hull-White (analytic formulae) calibration
+1x5: model 10.62037 %, market 11.48000 % (-0.85963 %)
+2x4: model 10.62959 %, market 11.08000 % (-0.45041 %)
+3x3: model 10.63414 %, market 10.70000 % (-0.06586 %)
+4x2: model 10.64428 %, market 10.21000 % (+0.43428 %)
+5x1: model 10.66132 %, market 10.00000 % (+0.66132 %)
+calibrated to:
+a = 0.046414, sigma = 0.0058693
+
+Hull-White (numerical) calibration
+1x5: model 10.31185 %, market 11.48000 % (-1.16815 %)
+2x4: model 10.54619 %, market 11.08000 % (-0.53381 %)
+3x3: model 10.66914 %, market 10.70000 % (-0.03086 %)
+4x2: model 10.74020 %, market 10.21000 % (+0.53020 %)
+5x1: model 10.79725 %, market 10.00000 % (+0.79725 %)
+calibrated to:
+a = 0.055229, sigma = 0.0061063
+
+Payer bermudan swaption struck at 5.00000 % (ATM)
+G2 (tree):      14.111
+G2 (fdm) :      14.113
+HW (tree):      12.904
+HW (fdm) :      12.91
+HW (num, tree): 13.158
+HW (num, fdm) : 13.157
+BK:             13.002
+Payer bermudan swaption struck at 6.00000 % (OTM)
+G2 (tree):       3.1943
+G2 (fdm) :       3.1809
+HW (tree):       2.4921
+HW (fdm) :       2.4596
+HW (num, tree):  2.615
+HW (num, fdm):   2.5829
+BK:              3.2751
+Payer bermudan swaption struck at 4.00000 % (ITM)
+G2 (tree):       42.61
+G2 (fdm) :       42.706
+HW (tree):       42.253
+HW (fdm) :       42.215
+HW (num, tree):  42.364
+HW (num, fdm) :  42.311
+BK:              41.825
+
+Run completed in 1 m 51 s
+```
+
+### Billiontrader Bootstrapping
+
+See article [here](http://billiontrader.com/2015/02/16/bootstrapping-with-quantlib/)
+
+```
+emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -o billiontrader-bootstrapping.js billiontrader-bootstrapping.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+```
+
+Expected output:
+
+```
+> node billiontrader-bootstrapping.js
+0.1375: 0.137499 % Actual/360 simple compounding
+0.1717: 0.171700 % Actual/360 simple compounding
+0.2112: 0.211200 % Actual/360 simple compounding
+0.2581: 0.258100 % Actual/360 simple compounding
+0.25093: 0.251098 % Actual/360 simple compounding
+0.32228: 0.322259 % Actual/360 simple compounding
+0.41111: 0.411112 % Actual/360 simple compounding
+0.51112: 0.511346 % Actual/360 simple compounding
+0.61698: 0.617716 % Actual/360 simple compounding
+0.73036: 0.732486 % Actual/360 Annual compounding
+0.89446: 0.890789 % Actual/360 Annual compounding
+1.23937: 1.237068 % Actual/360 Annual compounding
+1.49085: 1.489769 % Actual/360 Annual compounding
+1.67450: 1.674417 % Actual/360 Annual compounding
+ discount Rate : 0.919223
+ Forward Rate : 2.419765 % Actual/360 simple compounding
+```
+
+### hello-boost
+
+```
+emcc -I${BOOST} -o hello-boost.js hello-boost.cpp
+```
+
+Expected output:
+
+```
+> node hello-boost.js
+HELLO 12345
+```
+
+### hello-quantlib
+
+```
+emcc -I${BOOST} -I${QUANTLIB} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+```
+
+Expected output:
+
+```
+> node hello-quantlib.js
+HELLO May 15th, 2019
+```
+
+### swap-example
+
+```
+emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -o swap-example.js swap-example.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+```
+
+Expected output:
+
+```
+> node swap-example.js
+-11836.3
+```
+
+## Delete unwanted files
+
+du -d1 -h /quantlib/ql
+du -d1 -h /boost
+du -d1 -h /usr/local/lib
+
+mkdir /quantlib/libs
+mv /quantlib/ql/.libs/libQuantLib.a /quantlib/libs
+find /quantlib/ql -type f  ! \( -name "*.h" -o -name "*.hpp" \) -delete
+mv /quantlib/libs /quantlib/ql/.libs/libQuantLib.a
+rm -rf /quantlib/Examples
+
+find /boost/boost -type f  ! \( -name "*.h" -o -name "*.hpp" \) -delete
+rm -rf /boost/doc
+rm -rf /boost/libs
+
+rm -rf /usr/local/lib/libQuant*.*
+
+apt-get clean
