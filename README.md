@@ -6,13 +6,11 @@ install
 npm install @captor/node-quantlib
 ```
 
-@captor/node-quantlib is a wrapper in NodeJS of [Quantlib](https://www.quantlib.org/) compiled with
-[webassembly](https://webassembly.org/)
+@captor/node-quantlib is a wrapper in NodeJS of [Quantlib](https://www.quantlib.org/) compiled with [webassembly](https://webassembly.org/)
 
 ## Versioning
 
-@captor/node-quantlib does not follow https://semver.org/, but the version from [Quantlib](https://www.quantlib.org/)
-with an extra number to version the @captor/node-quantlib package.
+@captor/node-quantlib does not follow https://semver.org/, but the version from [Quantlib](https://www.quantlib.org/) with an extra number to version the @captor/node-quantlib package.
 
 ## Development
 
@@ -31,6 +29,14 @@ Then:
 ```
 docker run -v ${pwd}:/src -it captorab/emscripten-quantlib:1.15.2 /bin/bash
 ```
+
+Or continue execute and existing continer. Search with `docker ps -a`.
+
+```
+docker exec -it 590 /bin/bash
+```
+
+Where `590` is the current container id.
 
 ### Compile and test an example
 
@@ -52,8 +58,7 @@ node hello-quantlib.js
 
 ### Windows only: Share folder
 
-Add a local user to the windows machine called `docker`.
-In Docker / Settings / Shared Drives, share the disk drive. Use the user `docker`.
+Add a local user to the windows machine called `docker`. In Docker / Settings / Shared Drives, share the disk drive. Use the user `docker`.
 
 ## Setup the Emscripten container (from docker trzeci/emscripten)
 
@@ -79,8 +84,7 @@ apt-get -y install automake autoconf libtool
 
 ### Download and unzip Boost
 
-[Getting Started on Unix Variants](https://www.boost.org/doc/libs/1_70_0/more/getting_started/unix-variants.html)
-[Testing Emscripten with C++11 and Boost](https://gist.github.com/arielm/69a7488172611e74bfd4)
+[Getting Started on Unix Variants](https://www.boost.org/doc/libs/1_70_0/more/getting_started/unix-variants.html) [Testing Emscripten with C++11 and Boost](https://gist.github.com/arielm/69a7488172611e74bfd4)
 
 ```
 cd /tmp
@@ -143,8 +147,7 @@ ldconfig
 
 ### Build QuantLib with Boost and Emscripten
 
-How to use emconfigure and emmake, [see](https://emscripten.org/docs/compiling/Building-Projects.html)
-Also a good [guide](https://adamrehn.com/articles/creating-javascript-bindings-for-c-cxx-libraries-with-emscripten/)
+How to use emconfigure and emmake, [see](https://emscripten.org/docs/compiling/Building-Projects.html) Also a good [guide](https://adamrehn.com/articles/creating-javascript-bindings-for-c-cxx-libraries-with-emscripten/)
 
 ```
 cd $QUANTLIB
@@ -213,8 +216,7 @@ Builds .o-file (LLVM bitcode):
 emcc -DHAVE_CONFIG_H -I. -I../../ql  -I../.. -I../.. -I/src/boost_1_70_0  -g -O2 -MT BermudanSwaption.o -MD -MP -MF .deps/BermudanSwaption.Tpo -c -o BermudanSwaption.o BermudanSwaption.cpp
 ```
 
-[gcc arguments](http://tigcc.ticalc.org/doc/comopts.html)
-[emcc arguments](https://emscripten.org/docs/tools_reference/emcc.html)
+[gcc arguments](http://tigcc.ticalc.org/doc/comopts.html) [emcc arguments](https://emscripten.org/docs/tools_reference/emcc.html)
 
 ```
 emcc -I. -I../../ql -I../.. -I${BOOST} -L${BOOST}/lib/emscripten -O2 -MT BermudanSwaption.o -MD -MP -o BermudanSwaption.js BermudanSwaption.cpp
@@ -509,12 +511,9 @@ Add the file `c_cpp_properties.json` to the folder `.vscode` with the following 
 }
 ```
 
-`compilerPath` needs to be adjusted to local installation of the c++-compiler. (Visual Studio)[https://visualstudio.microsoft.com/]
-And `includePath` needs to be adjusted to match local installations of the three projects QuantLib, Boost and Emscripten.
+`compilerPath` needs to be adjusted to local installation of the c++-compiler. (Visual Studio)[https://visualstudio.microsoft.com/] And `includePath` needs to be adjusted to match local installations of the three projects QuantLib, Boost and Emscripten.
 
-Install QuantLib with `git clone https://github.com/lballabio/QuantLib`
-Install Boost from `https://www.boost.org/users/download/`
-Install Emscripten with `git clone https://github.com/emscripten-core/emscripten`
+Install QuantLib with `git clone https://github.com/lballabio/QuantLib` Install Boost from `https://www.boost.org/users/download/` Install Emscripten with `git clone https://github.com/emscripten-core/emscripten`
 
 ## List of other emscripten projects
 
