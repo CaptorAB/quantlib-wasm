@@ -68,6 +68,7 @@ docker run -v ${pwd}:/share -it -d trzeci/emscripten /bin/bash
 docker exec -it ee5 /bin/bash
 ```
 
+
 In bash install extra packages. Boost should be installed and build from sourcecode. Link to [libboost](https://packages.debian.org/jessie/libboost-all-dev)
 
 ```
@@ -155,12 +156,12 @@ emmake make install
 ldconfig
 ```
 
-### Build and run quantlib/emscripten docker image
+### Build and run captorab/quantlib/emscripten docker image
 
 Build using `Dockerfile` in the same folder.
 
 ```
-docker build -t docker.io/captorab/emscripten-quantlib:1.15.1 .
+docker build -t docker.io/captorab/emscripten-quantlib:1.15.2 .
 ```
 
 Run it (update the container id):
@@ -168,6 +169,12 @@ Run it (update the container id):
 ```
 docker run -v ${pwd}:/src -it quantlib/emscripten /bin/bash
 ```
+
+On MacOSX
+``` 
+docker run --mount type=bind,source="${PWD}",target=/src -it -d captorab/emscripten-quantlib:1.15.2 /bin/bash
+```
+
 
 ### Compile emscripten with boost
 
