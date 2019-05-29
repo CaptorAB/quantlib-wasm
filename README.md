@@ -19,19 +19,35 @@ with an extra number to version the @captor/node-quantlib package.
 ### Pull from docker
 
 ```
-docker pull trzeci/emscripten
+docker pull captorab/emscripten-quantlib:1.15.2
 ```
 
-### Compile
+### Run the container
+
+See note on 'Share folder' (Windows only) below.
+
+Then:
 
 ```
-docker run --rm -v ${pwd}:/src -u emscripten trzeci/emscripten emcc helloworld.cpp -o helloworld.js --closure 1
+docker run -v ${pwd}:/src -it captorab/emscripten-quantlib:1.15.2 /bin/bash
+```
+
+### Compile and test an example
+
+In the container:
+
+```
+cd examples
+emcc -I${BOOST} -I${QUANTLIB} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
 
 ### Run
 
+Outside the container:
+
 ```
-node helloworld.js
+cd examples
+node hello-quantlib.js
 ```
 
 ### Windows only: Share folder
@@ -39,7 +55,9 @@ node helloworld.js
 Add a local user to the windows machine called `docker`.
 In Docker / Settings / Shared Drives, share the disk drive. Use the user `docker`.
 
-### Setup the Emscripten container (from docker trzeci/emscripten)
+## Setup the Emscripten container (from docker trzeci/emscripten)
+
+### Start from trzeci/emscripten
 
 Start an emscripten container
 
@@ -148,41 +166,31 @@ docker build -t docker.io/captorab/emscripten-quantlib:1.15.1 .
 Run it (update the container id):
 
 ```
-docker run -v ${pwd}:/src -it -d quantlib/emscripten /bin/bash
-docker exec -it ee5 /bin/bash
+docker run -v ${pwd}:/src -it quantlib/emscripten /bin/bash
 ```
 
 ### Compile emscripten with boost
 
 [Using Boost with Emscripten](https://stackoverflow.com/questions/15724357/using-boost-with-emscripten)
 
-### Build Emscripten with Boost
+## Delete unwanted files
 
 ```
-cd TestingEmscriptenWithC11AndBoost
-emcc hello-boost.cpp -o hello-boost.js --closure 1 -v -Wno-warn-absolute-paths -std=c++11 -I${BOOST} -L${BOOST}/lib/emscripten -lboost_system -lboost_filesystem -lboost_iostreams
-```
+du -d1 -h /quantlib/ql
+du -d1 -h /boost
+du -d1 -h /usr/local/lib
 
-Or simply:
+mkdir /quantlib/libs
+mv /quantlib/ql/.libs/libQuantLib.a /quantlib/libs
+find /quantlib/ql -type f ! \( -name "_.h" -o -name "_.hpp" \) -delete
+mv /quantlib/libs /quantlib/ql/.libs/libQuantLib.a
+rm -rf /quantlib/Examples
 
-```
-emcc hello-boost.cpp -o hello-boost.js -std=c++11 -I${BOOST}
-```
+find /boost/boost -type f ! \( -name "_.h" -o -name "_.hpp" -o -name "\*.ipp" \) -delete
+rm -rf /boost/doc
+rm -rf /boost/libs
 
-Where hello-boost.cpp contains:
-
-```
-#include <boost/lexical_cast.hpp>
-#include <iostream>
-
-using namespace std;
-
-int main() {
-    string input = "12345";
-	auto tmp = boost::lexical_cast<int>(input);
-    std::cout << "HELLO " << tmp << std::endl;
-    return 0;
-}
+rm -rf /usr/local/lib/libQuant*.*
 ```
 
 ### Build BermudanSwaption example
@@ -248,7 +256,7 @@ Adding the right lib solves the problem:
 emcc -I${QUANTLIB} -I${BOOST} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
 
-## BINARYEN_TRAP_MODE=clamp
+### BINARYEN_TRAP_MODE=clamp
 
 This runtime error is handled with `BINARYEN_TRAP_MODE=clamp`
 
@@ -274,8 +282,11 @@ emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -s TOTAL_MEMORY=671088
 
 ### BermudanSwaption
 
+Use either `-s TOTAL_MEMORY=67108864` or `-s ALLOW_MEMORY_GROWTH=1`
+
 ```
-emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -s TOTAL_MEMORY=67108864 -o BermudanSwaption.js BermudanSwaption.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+# emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -s TOTAL_MEMORY=67108864 -o BermudanSwaption.js BermudanSwaption.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -O3 -s ALLOW_MEMORY_GROWTH=1 -s NO_EXIT_RUNTIME=1 -std=c++14 -o BermudanSwaption.js BermudanSwaption.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
 
 Expected output:
@@ -409,22 +420,67 @@ Expected output:
 -11836.3
 ```
 
-## Delete unwanted files
+### hello-emscripten
 
-du -d1 -h /quantlib/ql
-du -d1 -h /boost
-du -d1 -h /usr/local/lib
+```
+emcc -I${EMSCRIPTEN}/system/include --bind -o hello-emscripten.html hello-emscripten.cpp
+```
 
-mkdir /quantlib/libs
-mv /quantlib/ql/.libs/libQuantLib.a /quantlib/libs
-find /quantlib/ql -type f  ! \( -name "*.h" -o -name "*.hpp" \) -delete
-mv /quantlib/libs /quantlib/ql/.libs/libQuantLib.a
-rm -rf /quantlib/Examples
+Browse hello-emscripten.html. In the browser's console window
 
-find /boost/boost -type f  ! \( -name "*.h" -o -name "*.hpp" \) -delete
-rm -rf /boost/doc
-rm -rf /boost/libs
+```
+> Module.lerp(2,3,0.25)
+2.25
+```
 
-rm -rf /usr/local/lib/libQuant*.*
+Test in from node. `Create main.js` with the following content:
 
-apt-get clean
+```
+var Module = require("./examples/hello-emscripten");
+
+Module.onRuntimeInitialized = () => {
+    console.log(Module.lerp(2, 3, 0.25));
+};
+```
+
+Expected output:
+
+```
+> node main.js
+2.25
+```
+
+## How to enable C++ in VS Code
+
+In VS Code install the C/C++ `ms-vscode.cpptools` extension.
+
+Add the file `c_cpp_properties.json` to the folder `.vscode` with the following content:
+
+```
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": ["D:\\Repos\\QuantLib", "D:\\Repos\\boost", "D:\\Repos\\emscripten\\sdk\\system\\include"],
+            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+            "compilerPath": "C:\\\\Program Files (x86)\\\\Microsoft Visual Studio\\\\2019\\\\Community\\\\VC\\\\Tools\\\\MSVC\\\\14.20.27508\\\\bin\\\\Hostx64\\\\x64\\\\cl.exe",
+            "windowsSdkVersion": "10.0.17763.0",
+            "intelliSenseMode": "msvc-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
+```
+
+`compilerPath` needs to be adjusted to local installation of the c++-compiler. (Visual Studio)[https://visualstudio.microsoft.com/]
+And `includePath` needs to be adjusted to match local installations of the three projects QuantLib, Boost and Emscripten.
+
+Install QuantLib with `git clone https://github.com/lballabio/QuantLib`
+Install Boost from `https://www.boost.org/users/download/`
+Install Emscripten with `git clone https://github.com/emscripten-core/emscripten`
+
+## List of other emscripten projects
+
+(Link here)[https://github.com/emscripten-core/emscripten/wiki/Porting-Examples-and-Demos]
