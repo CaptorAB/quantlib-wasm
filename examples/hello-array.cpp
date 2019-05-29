@@ -51,8 +51,8 @@ EMSCRIPTEN_BINDINGS(my_module)
 {
     function("sum", &sum);
     //function("sum2", &sum2, allow_raw_pointers());
-    function("createDoubleVector", &createDoubleVector);
     function("createIntVector", &createIntVector);
+    function("createDoubleVector", &createDoubleVector);
     register_vector<int>("vector<int>");
     register_vector<double>("vector<double>");
 }
