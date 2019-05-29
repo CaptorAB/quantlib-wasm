@@ -172,7 +172,7 @@ docker run -v ${pwd}:/src -it quantlib/emscripten /bin/bash
 On MacOSX
 
 ```
-docker run --mount type=bind,source="${PWD}",target=/src -it -d captorab/emscripten-quantlib:1.15.2 /bin/bash
+docker run --mount type=bind,source="${PWD}",target=/src -it captorab/emscripten-quantlib:1.15.2 /bin/bash
 ```
 
 ### Compile emscripten with boost
