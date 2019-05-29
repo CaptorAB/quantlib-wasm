@@ -1,24 +1,25 @@
 {
-  "name": "@captor/node-quantlib",
-  "version": "0.0.1",
-  "description": "quantlib for node through WebAssembly",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CaptorAB/node-quantlib.git"
-  },
-  "keywords": [
-    "Quantlib",
-    "Node",
-    "WebAssembly"
-  ],
-  "author": "captor.se",
-  "license": "BSD-3-Clause-Attribution",
-  "bugs": {
-    "url": "https://github.com/CaptorAB/node-quantlib/issues"
-  },
-  "homepage": "https://github.com/CaptorAB/node-quantlib#readme"
+    "name": "@captor/node-quantlib",
+    "version": "0.0.1",
+    "description": "quantlib for node through WebAssembly",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/CaptorAB/node-quantlib.git"
+    },
+    "keywords": [
+        "Quantlib",
+        "Node",
+        "WebAssembly"
+    ],
+    "author": "captor.se",
+    "license": "BSD-3-Clause-Attribution",
+    "bugs": {
+        "url": "https://github.com/CaptorAB/node-quantlib/issues"
+    },
+    "homepage": "https://github.com/CaptorAB/node-quantlib#readme",
+    "devDependencies": {}
 }

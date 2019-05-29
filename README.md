@@ -68,7 +68,6 @@ docker run -v ${pwd}:/share -it -d trzeci/emscripten /bin/bash
 docker exec -it ee5 /bin/bash
 ```
 
-
 In bash install extra packages. Boost should be installed and build from sourcecode. Link to [libboost](https://packages.debian.org/jessie/libboost-all-dev)
 
 ```
@@ -171,10 +170,10 @@ docker run -v ${pwd}:/src -it quantlib/emscripten /bin/bash
 ```
 
 On MacOSX
-``` 
+
+```
 docker run --mount type=bind,source="${PWD}",target=/src -it -d captorab/emscripten-quantlib:1.15.2 /bin/bash
 ```
-
 
 ### Compile emscripten with boost
 
@@ -440,7 +439,7 @@ Browse hello-emscripten.html. In the browser's console window
 2.25
 ```
 
-Test in from node. `Create main.js` with the following content:
+Test in from Node.js. `Create main.js` with the following content:
 
 ```
 var Module = require("./examples/hello-emscripten");
@@ -455,6 +454,35 @@ Expected output:
 ```
 > node main.js
 2.25
+```
+
+### hello-array
+
+Build with:
+
+```
+emcc -I${EMSCRIPTEN}/system/include --bind -o hello-array.js hello-array.cpp
+```
+
+Test in from Node.js. `Create main.js` with the following content:
+
+```
+var Module = require("./examples/hello-array");
+
+Module.onRuntimeInitialized = () => {
+    var v = Module.createDoubleVector(5);
+    for (let i = 0; i < 5; i++) {
+        v.set(i, i + 1);
+    }
+    console.log(Module.sum(v));
+};
+```
+
+Expected output:
+
+```
+> node main.js
+15
 ```
 
 ## How to enable C++ in VS Code

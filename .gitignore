@@ -36,3 +36,9 @@
 
 *.gz
 *.bz2
+
+examples/*.js
+examples/*.wasm
+examples/*.html
+
+package-lock.json
