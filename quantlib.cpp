@@ -1,6 +1,8 @@
 // Compile with:
 // emcc -I${EMSCRIPTEN}/system/include -I${QUANTLIB} -I${BOOST} --bind -o quantlib.js quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 
+// https://www.quantlib.org/slides/dima-ql-intro-1.pdf
+
 #include <math.h>
 #include <iostream>
 #include <ql/quantlib.hpp>
@@ -41,7 +43,7 @@ vector<int> createIntVector(int size)
     return vector<int>(size, 1);
 }
 
-vector<int> scheduleDates(Schedule& schedule)
+vector<int> scheduleDates(Schedule &schedule)
 {
     vector<int> res = vector<int>(schedule.size(), 1);
     for (int i = 0; i < schedule.size(); i++)
@@ -49,23 +51,23 @@ vector<int> scheduleDates(Schedule& schedule)
     return res;
 }
 
-Schedule generateSchedule(int effectiveDateAsSerialNumber, int terminationDateAsSerialNumber, int periodCount, TimeUnit periodTimeUnit, BusinessDayConvention convention, 
-        BusinessDayConvention terminationDateConvention, DateGeneration::Rule rule, bool endOfMonth, 
-        int firstDateAsSerialNumber = 0, int nextToLastDateAsSerialNumber = 0)
+Schedule generateSchedule(int effectiveDateAsSerialNumber, int terminationDateAsSerialNumber, int periodCount, TimeUnit periodTimeUnit, BusinessDayConvention convention,
+                          BusinessDayConvention terminationDateConvention, DateGeneration::Rule rule, bool endOfMonth,
+                          int firstDateAsSerialNumber = 0, int nextToLastDateAsSerialNumber = 0)
 {
     Date effectiveDate = Date(effectiveDateAsSerialNumber);
     Date terminationDate = Date(terminationDateAsSerialNumber);
     Period tenor = Period(periodCount, periodTimeUnit);
     Calendar calendar = Sweden();
-    Date firstDate = (firstDateAsSerialNumber==0) ? Date() : Date(firstDateAsSerialNumber);
-    Date nextToLastDate = (nextToLastDateAsSerialNumber==0) ? Date() : Date(nextToLastDateAsSerialNumber);
+    Date firstDate = (firstDateAsSerialNumber == 0) ? Date() : Date(firstDateAsSerialNumber);
+    Date nextToLastDate = (nextToLastDateAsSerialNumber == 0) ? Date() : Date(nextToLastDateAsSerialNumber);
     return Schedule(effectiveDate, terminationDate, tenor, calendar, convention, terminationDateConvention, rule, endOfMonth, firstDate, nextToLastDate);
 }
 
-Schedule createScheduleFromDates(vector<int>& datesAsSerialNumber)
+Schedule createScheduleFromDates(vector<int> &datesAsSerialNumber)
 {
     vector<Date> dates = vector<Date>(datesAsSerialNumber.size());
-    for (int i=0; i<datesAsSerialNumber.size(); i++)
+    for (int i = 0; i < datesAsSerialNumber.size(); i++)
     {
         dates[i] = Date(datesAsSerialNumber[i]);
     }
