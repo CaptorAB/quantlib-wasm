@@ -1,4 +1,4 @@
-// Compile with:
+// Build with:
 // emcc -I${BOOST} -I${QUANTLIB} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 
 #include <iostream>

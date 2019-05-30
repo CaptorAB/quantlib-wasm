@@ -1,3 +1,6 @@
+// Build with:
+// emcc -I${EMSCRIPTEN}/system/include --bind -o hello-array.js hello-array.cpp
+
 // Useful links and projects
 //
 // https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html

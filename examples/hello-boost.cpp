@@ -1,4 +1,4 @@
-// Compile with:
+// Build with:
 // emcc -I${BOOST} -o hello-boost.js hello-boost.cpp
 
 #include <iostream>

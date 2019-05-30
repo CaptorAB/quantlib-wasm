@@ -1,3 +1,6 @@
+// Build with:
+// emcc -I${EMSCRIPTEN}/system/include --bind -o hello-emscripten.html hello-emscripten.cpp
+
 #include <iostream>
 #include <emscripten/bind.h>
 

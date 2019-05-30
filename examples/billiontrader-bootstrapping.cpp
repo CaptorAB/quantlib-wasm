@@ -1,3 +1,6 @@
+// Compile with:
+// emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -o billiontrader-bootstrapping.js billiontrader-bootstrapping.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+
 #include <ql/quantlib.hpp>
 
 #ifdef BOOST_MSVC

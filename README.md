@@ -288,6 +288,91 @@ emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -s TOTAL_MEMORY=671088
 
 ## Build test examples
 
+### hello-boost
+
+```
+emcc -I${BOOST} -o hello-boost.js hello-boost.cpp
+```
+
+Expected output:
+
+```
+> node hello-boost.js
+HELLO 12345
+```
+
+### hello-quantlib
+
+```
+emcc -I${BOOST} -I${QUANTLIB} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+```
+
+Expected output:
+
+```
+> node hello-quantlib.js
+HELLO May 15th, 2019
+```
+
+### hello-emscripten
+
+```
+emcc -I${EMSCRIPTEN}/system/include --bind -o hello-emscripten.html hello-emscripten.cpp
+```
+
+Browse hello-emscripten.html. In the browser's console window
+
+```
+> Module.lerp(2,3,0.25)
+2.25
+```
+
+Test in from Node.js. `Create main.js` with the following content:
+
+```
+var Module = require("./examples/hello-emscripten");
+
+Module.onRuntimeInitialized = () => {
+    console.log(Module.lerp(2, 3, 0.25));
+};
+```
+
+Expected output:
+
+```
+> node main.js
+2.25
+```
+
+### hello-array
+
+Build with:
+
+```
+emcc -I${EMSCRIPTEN}/system/include --bind -o hello-array.js hello-array.cpp
+```
+
+Test in from Node.js. `Create main.js` with the following content:
+
+```
+var Module = require("./examples/hello-array");
+
+Module.onRuntimeInitialized = () => {
+    var v = Module.createDoubleVector(5);
+    for (let i = 0; i < 5; i++) {
+        v.set(i, i + 1);
+    }
+    console.log(Module.sum(v));
+};
+```
+
+Expected output:
+
+```
+> node main.js
+15
+```
+
 ### BermudanSwaption
 
 Use either `-s TOTAL_MEMORY=67108864` or `-s ALLOW_MEMORY_GROWTH=1`
@@ -389,32 +474,6 @@ Expected output:
  Forward Rate : 2.419765 % Actual/360 simple compounding
 ```
 
-### hello-boost
-
-```
-emcc -I${BOOST} -o hello-boost.js hello-boost.cpp
-```
-
-Expected output:
-
-```
-> node hello-boost.js
-HELLO 12345
-```
-
-### hello-quantlib
-
-```
-emcc -I${BOOST} -I${QUANTLIB} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
-```
-
-Expected output:
-
-```
-> node hello-quantlib.js
-HELLO May 15th, 2019
-```
-
 ### swap-example
 
 ```
@@ -426,65 +485,6 @@ Expected output:
 ```
 > node swap-example.js
 -11836.3
-```
-
-### hello-emscripten
-
-```
-emcc -I${EMSCRIPTEN}/system/include --bind -o hello-emscripten.html hello-emscripten.cpp
-```
-
-Browse hello-emscripten.html. In the browser's console window
-
-```
-> Module.lerp(2,3,0.25)
-2.25
-```
-
-Test in from Node.js. `Create main.js` with the following content:
-
-```
-var Module = require("./examples/hello-emscripten");
-
-Module.onRuntimeInitialized = () => {
-    console.log(Module.lerp(2, 3, 0.25));
-};
-```
-
-Expected output:
-
-```
-> node main.js
-2.25
-```
-
-### hello-array
-
-Build with:
-
-```
-emcc -I${EMSCRIPTEN}/system/include --bind -o hello-array.js hello-array.cpp
-```
-
-Test in from Node.js. `Create main.js` with the following content:
-
-```
-var Module = require("./examples/hello-array");
-
-Module.onRuntimeInitialized = () => {
-    var v = Module.createDoubleVector(5);
-    for (let i = 0; i < 5; i++) {
-        v.set(i, i + 1);
-    }
-    console.log(Module.sum(v));
-};
-```
-
-Expected output:
-
-```
-> node main.js
-15
 ```
 
 ## How to enable C++ in VS Code
