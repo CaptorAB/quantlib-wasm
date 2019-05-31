@@ -498,7 +498,7 @@ Add the file `c_cpp_properties.json` to the folder `.vscode` with the following 
     "configurations": [
         {
             "name": "Win32",
-            "includePath": ["D:\\Repos\\QuantLib", "D:\\Repos\\boost", "D:\\Repos\\emscripten\\sdk\\system\\include"],
+            "includePath": ["C:\\Repos\\QuantLib", "C:\\Repos\\boost", "C:\\Repos\\emscripten\\system\\include"],
             "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
             "compilerPath": "C:\\\\Program Files (x86)\\\\Microsoft Visual Studio\\\\2019\\\\Community\\\\VC\\\\Tools\\\\MSVC\\\\14.20.27508\\\\bin\\\\Hostx64\\\\x64\\\\cl.exe",
             "windowsSdkVersion": "10.0.17763.0",
@@ -513,8 +513,11 @@ Add the file `c_cpp_properties.json` to the folder `.vscode` with the following 
 
 `compilerPath` needs to be adjusted to local installation of the c++-compiler. (Visual Studio)[https://visualstudio.microsoft.com/] And `includePath` needs to be adjusted to match local installations of the three projects QuantLib, Boost and Emscripten.
 
-Install QuantLib with `git clone https://github.com/lballabio/QuantLib` Install Boost from `https://www.boost.org/users/download/` Install Emscripten with `git clone https://github.com/emscripten-core/emscripten`
+-   Install QuantLib with `git clone https://github.com/lballabio/QuantLib`
+-   Install Boost from `https://www.boost.org/users/download/`
+-   Install Emscripten with `git clone https://github.com/emscripten-core/emscripten`
 
-## List of other emscripten projects
+## Useful links
 
-(Link here)[https://github.com/emscripten-core/emscripten/wiki/Porting-Examples-and-Demos]
+-   (List of other emscripten projects)[https://github.com/emscripten-core/emscripten/wiki/Porting-Examples-and-Demos]
+-   (WebAssembly Explorer)[https://mbebenita.github.io/WasmExplorer/]

@@ -39,27 +39,23 @@ function performanceTest() {
 
 		return sqrt((sx2 - sqr(sx) / n) / (n - 1));
 	};
-	const hrtimeDiffToMs = (t0, t1) => (t1[0] - t0[0] + (t1[1] - t0[1]) / 1000000) / 1000;
+	const hrtimeDiffToMs = (t0, t1) => 1000 * (t1[0] - t0[0]) + (t1[1] - t0[1]) / 1000000;
 
-	var arr = [...Array(100000)].map((d, i) => i + 1);
+	var arr = [...Array(400000)].map((d, i) => i + 1);
 	var t0 = process.hrtime();
 	var s0 = stdev(arr);
 	var t1 = process.hrtime();
-	var t2 = process.hrtime();
 	var s1 = QuantLib.stdev(toWasmDoubleVector(arr));
+	var t2 = process.hrtime();
+	var s2 = QuantLib.stdevDummy(toWasmDoubleVector(arr));
 	var t3 = process.hrtime();
-	console.log(s0, s1, hrtimeDiffToMs(t0, t1), hrtimeDiffToMs(t2, t3));
+	console.log(s0, s1);
+	console.log("JavaScript " + hrtimeDiffToMs(t0, t1));
+	console.log("WebAssembly " + hrtimeDiffToMs(t1, t2));
+	console.log("WebAssembly excl copy data " + (hrtimeDiffToMs(t1, t2) - hrtimeDiffToMs(t2, t3)));
 }
 
-QuantLib.onRuntimeInitialized = () => {
-	// var arr = [...Array(100000)].map((d, i) => i + 1);
-	// for (let index = 0; index < 1000; index++) {
-	// 	let a = toWasmDoubleVector(arr);
-	// 	let v = QuantLib.stdev(a);
-	// 	a.delete();
-	// }
-	var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
-
+function replicateSwapExample() {
 	var valuationDate = new Date("2012-12-31");
 
 	var nominal = 1000000.0;
@@ -113,4 +109,53 @@ QuantLib.onRuntimeInitialized = () => {
 			wasmOisCurveDfs
 		)
 	);
+}
+
+function generateSchedule() {
+	var effectiveDateAsSerialNumber = dateToSerialNumber(new Date("2019-05-15"));
+	var terminationDateAsSerialNumber = dateToSerialNumber(new Date("2023-05-31"));
+	var calendar = QuantLib.sweden;
+	var periodCount = 6;
+	var periodTimeUnit = QuantLib.TimeUnit.Months;
+	var convention = QuantLib.BusinessDayConvention.ModifiedFollowing;
+	var terminationDateConvention = QuantLib.BusinessDayConvention.ModifiedFollowing;
+	var rule = QuantLib.DateGenerationRule.Forward;
+	var endOfMonth = false;
+	var firstDateAsSerialNumber = 0;
+	var nextToLastDateAsSerialNumber = 0;
+
+	var schedule = QuantLib.generateSchedule(
+		effectiveDateAsSerialNumber,
+		terminationDateAsSerialNumber,
+		periodCount,
+		periodTimeUnit,
+		calendar,
+		convention,
+		terminationDateConvention,
+		rule,
+		endOfMonth,
+		firstDateAsSerialNumber,
+		nextToLastDateAsSerialNumber
+	);
+	const dateToString = d => d.toISOString().substring(0, 10);
+
+	var dates = schedule.dates();
+	for (let i = 0; i < dates.size(); i++) {
+		console.log(dateToString(serialNumberToDate(dates.get(i))));
+	}
+}
+
+QuantLib.onRuntimeInitialized = () => {
+	generateSchedule();
+	// BusinessDayConvention terminationDateConvention, DateGeneration::Rule rule, bool endOfMonth,
+	// int firstDateAsSerialNumber = 0, int nextToLastDateAsSerialNumber = 0
+	// var arr = [...Array(100000)].map((d, i) => i + 1);
+	// for (let index = 0; index < 1000; index++) {
+	// 	let a = toWasmDoubleVector(arr);
+	// 	let v = QuantLib.stdev(a);
+	// 	a.delete();
+	// }
+	// var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
+	// replicateSwapExample();
+	// performanceTest();
 };
