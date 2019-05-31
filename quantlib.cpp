@@ -188,6 +188,11 @@ inline double sqr(double x)
     return x * x;
 }
 
+double stdevDummy(vector<double> xs)
+{
+    return 0;
+}
+
 double stdev(vector<double> xs)
 {
     int n = xs.size();
@@ -262,6 +267,7 @@ EMSCRIPTEN_BINDINGS(my_module)
     emscripten::function("generateSchedule", &generateSchedule);
     emscripten::function("createScheduleFromDates", &createScheduleFromDates);
     emscripten::function("stdev", &stdev);
+    emscripten::function("stdevDummy", &stdevDummy);
     emscripten::function("createIntVector", &createIntVector);
     emscripten::function("createDoubleVector", &createDoubleVector);
     register_vector<int>("vector<int>");
