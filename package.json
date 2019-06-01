@@ -21,5 +21,7 @@
         "url": "https://github.com/CaptorAB/node-quantlib/issues"
     },
     "homepage": "https://github.com/CaptorAB/node-quantlib#readme",
-    "devDependencies": {}
+    "devDependencies": {
+        "jest": "^24.8.0"
+    }
 }

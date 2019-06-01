@@ -42,3 +42,4 @@ examples/*.wasm
 examples/*.html
 
 package-lock.json
+node_modules
