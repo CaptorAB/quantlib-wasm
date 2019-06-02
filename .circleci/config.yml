@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: captorab/emscripten-quantlib:1.15.2
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run: make build_bindings
+
+
