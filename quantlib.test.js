@@ -1,23 +1,25 @@
-var QuantLib = null;
+const fs = require("fs");
+const path = require("path");
 
-beforeAll(async () => {
-    console.log("beforeAll");
-});
+describe("captor/quantlib", () => {
+    let QuantLib;
 
-test("Date", async () => {
-    console.log('test("Date")');
-    new Promise((resolve, reject) => {
-        var loader = require("./quantlib")();
-        loader.onRuntimeInitialized = () => {
-            resolve(loader);
-        };
-    })
-        .then((resp) => {
-            QuantLib = resp;
-        })
-        .catch((error) => {
-            console.log(error);
+    beforeAll(async () => {
+        const wasmPath = path.resolve(__dirname, "quantlib.wasm");
+        const buffer = fs.readFileSync(wasmPath);
+        const results = await WebAssembly.instantiate(buffer, {
+            env: {
+                memoryBase: 0,
+                tableBase: 0,
+                memory: new WebAssembly.Memory({ initial: 1024 }),
+                table: new WebAssembly.Table({ initial: 16, element: "anyfunc" }),
+                abort: console.log
+            }
         });
-    QuantLib = await p;
-    console.log(QuantLib.Sweden.name());
+        QuantLib = results.instance.exports;
+    });
+
+    test("Date", async () => {
+        console.log(QuantLib.Sweden.name());
+    });
 });
