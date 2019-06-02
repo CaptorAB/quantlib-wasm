@@ -1,16 +1,20 @@
 # @captor/node-quantlib
 
+
+alfa: NOT PUBLISHED YET
+
+
 install
 
 ```bash
-npm install @captor/node-quantlib
+npm install @captor/quantlib
 ```
 
-@captor/node-quantlib is a wrapper in NodeJS of [Quantlib](https://www.quantlib.org/) compiled with [webassembly](https://webassembly.org/)
+@captor/quantlib is a wrapper in NodeJS of [Quantlib](https://www.quantlib.org/) compiled with [webassembly](https://webassembly.org/)
 
 ## Versioning
 
-@captor/node-quantlib does not follow https://semver.org/, but the version from [Quantlib](https://www.quantlib.org/) with an extra number to version the @captor/node-quantlib package.
+@captor/quantlib does not follow https://semver.org/, but the version from [Quantlib](https://www.quantlib.org/) with an extra number to version the @captor/quantlib package.
 
 ## Development
 

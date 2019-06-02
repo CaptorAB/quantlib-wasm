@@ -1,5 +1,5 @@
 {
-    "name": "@captor/node-quantlib",
+    "name": "@captor/quantlib",
     "version": "0.0.1",
     "description": "quantlib for node through WebAssembly",
     "main": "index.js",
