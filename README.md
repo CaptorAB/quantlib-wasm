@@ -1,3 +1,6 @@
+[![CircleCI](https://circleci.com/gh/CaptorAB/node-quantlib/tree/master.svg?style=svg)](https://circleci.com/gh/CaptorAB/node-quantlib/tree/master)
+
+
 # @captor/node-quantlib
 
 
