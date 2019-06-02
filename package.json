@@ -1,10 +1,10 @@
 {
     "name": "@captor/quantlib",
     "version": "0.0.1",
-    "description": "quantlib for node through WebAssembly",
+    "description": "Quantlib for NodeJS through WebAssembly",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "jest quantlib.test.js --detectOpenHandles --maxWorkers=1 --forceExit"
     },
     "repository": {
         "type": "git",
@@ -22,6 +22,35 @@
     },
     "homepage": "https://github.com/CaptorAB/node-quantlib#readme",
     "devDependencies": {
-        "jest": "^24.8.0"
+        "jest": "^24.8.0",
+        "jest-cli": "24.8.0",
+        "eslint": "5.12.0",
+        "eslint-config-prettier": "^4.0.0",
+        "eslint-config-standard": "^12.0.0",
+        "eslint-plugin-jest": "^22.3.2",
+        "prettier-eslint-cli": "4.7.1"
+    },
+    "jest": {
+        "setupFilesAfterEnv": [
+            "<rootDir>/jest.setup.js"
+        ],
+        "verbose": true,
+        "testEnvironment": "node",
+        "testPathIgnorePatterns": [
+            "/node_modules/"
+        ],
+        "collectCoverageFrom": [
+            "**/*.{js,jsx}",
+            "!**/coverage/**",
+            "!.eslintrc.js"
+        ]
+    },
+    "eslintIgnore": [],
+    "prettier": {
+        "printWidth": 140,
+        "semi": true,
+        "tabWidth": 4,
+        "bracketSpacing": true,
+        "arrowParens": "always"
     }
 }

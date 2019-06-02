@@ -9,5 +9,6 @@ jobs:
     steps:
       - checkout
       - run: make build_bindings
+      - run: npm install
 
 

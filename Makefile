@@ -1,2 +1,9 @@
+
+# this needs to be the first target if target build_bindings_from_unix is going to work
 build_bindings:
 	emcc --bind -I${EMSCRIPTEN}/system/include -I${QUANTLIB} -I${BOOST} -O3 -s MODULARIZE=1 -s EXPORT_NAME=QuantLib -o quantlib.js quantlib-embind.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+
+
+build_bindings_from_unix:
+	docker pull captorab/emscripten-quantlib:1.15.2
+	docker run --mount type=bind,source="${PWD}",target=/src -it captorab/emscripten-quantlib:1.15.2 make
