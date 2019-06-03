@@ -10,5 +10,6 @@ jobs:
       - checkout
       - run: make build_bindings
       - run: npm install
+      - run: npm test
 
 
