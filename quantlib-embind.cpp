@@ -1,5 +1,5 @@
 // Build with:
-// emcc --bind -I${EMSCRIPTEN}/system/include -I${QUANTLIB} -I${BOOST} -O3 -s MODULARIZE=1 -s EXPORT_NAME=QuantLib -o quantlib.js quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+// emcc --bind -I${EMSCRIPTEN}/system/include -I${QUANTLIB} -I${BOOST} -O3 -s MODULARIZE=1 -s "EXTRA_EXPORTED_RUNTIME_METHODS=['addOnPostRun']" -s EXPORT_NAME=QuantLib -o quantlib-embind.js quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 
 // https://www.quantlib.org/slides/dima-ql-intro-1.pdf
 

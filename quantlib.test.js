@@ -1,25 +1,19 @@
-const fs = require("fs");
-const path = require("path");
+var QuantLibModule = require("./quantlib");
+var QuantLib = null;
 
-describe("captor/quantlib", () => {
-    let QuantLib;
-
-    beforeAll(async () => {
-        const wasmPath = path.resolve(__dirname, "quantlib.wasm");
-        const buffer = fs.readFileSync(wasmPath);
-        const results = await WebAssembly.instantiate(buffer, {
-            env: {
-                memoryBase: 0,
-                tableBase: 0,
-                memory: new WebAssembly.Memory({ initial: 1024 }),
-                table: new WebAssembly.Table({ initial: 16, element: "anyfunc" }),
-                abort: console.log
-            }
+beforeAll(async () => {
+    var loader = QuantLibModule();
+    loader.ready = () =>
+        new Promise((resolve, reject) => {
+            delete loader.then;
+            loader.onAbort = reject;
+            loader.addOnPostRun(() => {
+                resolve(loader);
+            });
         });
-        QuantLib = results.instance.exports;
-    });
+    QuantLib = await loader.ready();
+});
 
-    test("Date", async () => {
-        console.log(QuantLib.Sweden.name());
-    });
+test("Sweden Calendar", async () => {
+    expect(QuantLib.Sweden.name()).toBe("Sweden");
 });
