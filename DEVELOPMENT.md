@@ -42,6 +42,12 @@ cd examples
 node hello-quantlib.js
 ```
 
+### Build quantlib-embind
+
+```
+emcc --bind -I${EMSCRIPTEN}/system/include -I${QUANTLIB} -I${BOOST} -O3 -s MODULARIZE=1 -s "EXTRA_EXPORTED_RUNTIME_METHODS=['addOnPostRun']" -s EXPORT_NAME=QuantLib -o quantlib-embind.js quantlib-embind.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+```
+
 ### Windows only: Share folder
 
 Add a local user to the windows machine called `docker`. In Docker / Settings / Shared Drives, share the disk drive. Use the user `docker`.
@@ -188,7 +194,7 @@ rm -rf /boost/libs
 rm -rf /usr/local/lib/libQuant*.*
 ```
 
-### Build BermudanSwaption example
+### Build Quantlibs BermudanSwaption example
 
 ```
 QUANTLIB=/src/QuantLib-1.15
@@ -277,6 +283,7 @@ emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -s TOTAL_MEMORY=671088
 ### hello-boost
 
 ```
+cd examples
 emcc -I${BOOST} -o hello-boost.js hello-boost.cpp
 ```
 
@@ -290,6 +297,7 @@ HELLO 12345
 ### hello-quantlib
 
 ```
+cd examples
 emcc -I${BOOST} -I${QUANTLIB} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
 
@@ -303,6 +311,7 @@ HELLO May 15th, 2019
 ### hello-emscripten
 
 ```
+cd examples
 emcc -I${EMSCRIPTEN}/system/include --bind -o hello-emscripten.html hello-emscripten.cpp
 ```
 
@@ -335,6 +344,7 @@ Expected output:
 Build with:
 
 ```
+cd examples
 emcc -I${EMSCRIPTEN}/system/include --bind -o hello-array.js hello-array.cpp
 ```
 
@@ -365,6 +375,7 @@ Use either `-s TOTAL_MEMORY=67108864` or `-s ALLOW_MEMORY_GROWTH=1`
 
 ```
 # emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -s TOTAL_MEMORY=67108864 -o BermudanSwaption.js BermudanSwaption.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
+cd examples
 emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -O3 -s ALLOW_MEMORY_GROWTH=1 -s NO_EXIT_RUNTIME=1 -std=c++14 -o BermudanSwaption.js BermudanSwaption.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
 
@@ -435,6 +446,7 @@ Run completed in 1 m 51 s
 See article [here](http://billiontrader.com/2015/02/16/bootstrapping-with-quantlib/)
 
 ```
+cd examples
 emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -o billiontrader-bootstrapping.js billiontrader-bootstrapping.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
 
@@ -463,6 +475,7 @@ Expected output:
 ### swap-example
 
 ```
+cd examples
 emcc -I${BOOST} -I${QUANTLIB} -s BINARYEN_TRAP_MODE=clamp -o swap-example.js swap-example.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
 
