@@ -99,6 +99,12 @@ function replicateSwapExample2() {
     discountCurveDfs.set(2, 0.89);
 
     var actual360 = new Actual360();
+    // for (let i = 0; i < 1000000; i++) {
+    //     let forwardingTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, forwardCurveDfs, actual360);
+    //     let discountTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, discountCurveDfs, actual360);
+    //     forwardingTermStructure.delete();
+    //     discountTermStructure.delete();
+    // }
 
     var forwardingTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, forwardCurveDfs, actual360);
     var discountTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, discountCurveDfs, actual360);
@@ -145,6 +151,26 @@ function replicateSwapExample2() {
     var euribor = new Euribor(floatTenor, forwardingTermStructure);
     var previousFixingDate = euribor.fixingDate(previousResetDate);
     euribor.addFixing(previousFixingDate, previousResetValue, true);
+
+    // for (let i = 0; i < 1000000; i++) {
+    //     let euribor = new Euribor(floatTenor, forwardingTermStructure);
+    //     let previousFixingDate = euribor.fixingDate(previousResetDate);
+    //     euribor.addFixing(previousFixingDate, previousResetValue, true);
+    //     // let swap = QuantLib.createVanillaSwap(
+    //     //     VanillaSwapType.Payer,
+    //     //     nominal,
+    //     //     fixedSchedule,
+    //     //     fixedRate,
+    //     //     fixedDayCount,
+    //     //     floatSchedule,
+    //     //     euribor,
+    //     //     spread,
+    //     //     floatingDayCount
+    //     // );
+    //     // swap.delete();
+    //     euribor.delete();
+    //     previousFixingDate.delete();
+    // }
 
     var swap = new VanillaSwap(
         VanillaSwapType.Payer,

@@ -199,20 +199,24 @@ double stdev(vector<double> &xs)
 Handle<YieldTermStructure> *createLogLinearYieldTermStructure(vector<Date> &dates, vector<DiscountFactor> &discountFactor, DayCounter &dayCounter)
 {
     boost::shared_ptr<YieldTermStructure> yts(new InterpolatedDiscountCurve<LogLinear>(dates, discountFactor, dayCounter));
-    Handle<YieldTermStructure> *res = new Handle<YieldTermStructure>(yts);
-    return res;
+    return new Handle<YieldTermStructure>(yts);
 }
 
-VanillaSwap *createVanillaSwap(VanillaSwap::Type type, Real nominal, const Schedule &fixedSchedule, Rate fixedRate, DayCounter &fixedDayCount, const Schedule &floatSchedule, IborIndex &iborIndex, Spread spread, DayCounter &floatingDayCount)
+VanillaSwap *createVanillaSwap(VanillaSwap::Type type, Real nominal, const Schedule &fixedSchedule, Rate fixedRate, DayCounter &fixedDayCount,
+                               const Schedule &floatSchedule, IborIndex &iborIndex, Spread spread, DayCounter &floatingDayCount)
 {
+    cout << "createVanillaSwap1" << endl;
     boost::shared_ptr<IborIndex> iborIndexPtr(&iborIndex);
-    return new VanillaSwap(type, nominal, fixedSchedule, fixedRate, fixedDayCount, floatSchedule, iborIndexPtr, spread, floatingDayCount);
+    cout << "createVanillaSwap2" << endl;
+    VanillaSwap *res = new VanillaSwap(type, nominal, fixedSchedule, fixedRate, fixedDayCount, floatSchedule, iborIndexPtr, spread, floatingDayCount);
+    cout << "createVanillaSwap3" << endl;
+    return res;
 }
 
 class MyClass
 {
 public:
-    MyClass(int x, std::string y)
+    MyClass(int x, string y)
         : x(x), y(y)
     {
     }
@@ -225,14 +229,14 @@ public:
     int getX() const { return x; }
     void setX(int x_) { x = x_; }
 
-    static std::string getStringFromInstance(const MyClass &instance)
+    static string getStringFromInstance(const MyClass &instance)
     {
         return instance.y;
     }
 
 private:
     int x;
-    std::string y;
+    string y;
 };
 
 EMSCRIPTEN_BINDINGS(my_module)
@@ -380,6 +384,7 @@ EMSCRIPTEN_BINDINGS(my_module)
     class_<VanillaSwap>("VanillaSwap")
         .constructor(&createVanillaSwap, allow_raw_pointers())
         // .constructor<VanillaSwap::Type, Rate, Schedule, Rate, DayCounter, Schedule, ext::shared_ptr<IborIndex>, Spread, DayCounter, boost::optional<BusinessDayConvention>>()
+        .class_function("create", &createVanillaSwap, allow_raw_pointers())
         .function("setPricingEngine", &swapSetPricingEngine)
         .function("NPV", &swapNpv);
     class_<Handle<YieldTermStructure>>("Handle<YieldTermStructure>");
@@ -399,7 +404,7 @@ EMSCRIPTEN_BINDINGS(my_module)
     register_vector<Date>("vector<Date>")
         .constructor<int>();
     class_<MyClass>("MyClass")
-        .constructor<int, std::string>()
+        .constructor<int, string>()
         .function("incrementX", &MyClass::incrementX)
         .property("x", &MyClass::getX, &MyClass::setX)
         .class_function("getStringFromInstance", &MyClass::getStringFromInstance);
