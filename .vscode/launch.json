@@ -7,6 +7,12 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "main.js",
+            "program": "${workspaceFolder}/main.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Jest All",
             "program": "${workspaceFolder}/node_modules/.bin/jest",
             "args": ["--runInBand"],

@@ -1,4 +1,4 @@
-var QuantLib = require("./quantlib");
+var QuantLib = require("./quantlib-embind");
 
 const dateToSerialNumber = (d) => d.getTime() / 86400000 + 25569;
 const serialNumberToDate = (n) => new Date((n - 25569) * 86400000);
@@ -325,10 +325,24 @@ QuantLibLoader.onRuntimeInitialized = () => {
     // 	a.delete();
     // }
     // var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
+
+    // Works fine
+    // const { MyClass } = QuantLib;
+    // for (let i = 0; i < 1000000; i++) {
+    //     let instance = new MyClass(10, "hello");
+    //     instance.incrementX();
+    //     let x = instance.x; // 11
+    //     instance.x = 20; // 20
+    //     let s = MyClass.getStringFromInstance(instance); // "hello"
+    //     instance.delete();
+    // }
+
     var v;
     for (let i = 0; i < 3; i++) {
         v = replicateSwapExample2();
     }
+    let m = QuantLib.mallinfo();
+    console.log(JSON.stringify(m));
     console.log(v);
     // performanceTest();
     // testDate();

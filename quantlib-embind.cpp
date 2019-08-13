@@ -209,6 +209,32 @@ VanillaSwap *createVanillaSwap(VanillaSwap::Type type, Real nominal, const Sched
     return new VanillaSwap(type, nominal, fixedSchedule, fixedRate, fixedDayCount, floatSchedule, iborIndexPtr, spread, floatingDayCount);
 }
 
+class MyClass
+{
+public:
+    MyClass(int x, std::string y)
+        : x(x), y(y)
+    {
+    }
+
+    void incrementX()
+    {
+        ++x;
+    }
+
+    int getX() const { return x; }
+    void setX(int x_) { x = x_; }
+
+    static std::string getStringFromInstance(const MyClass &instance)
+    {
+        return instance.y;
+    }
+
+private:
+    int x;
+    std::string y;
+};
+
 EMSCRIPTEN_BINDINGS(my_module)
 {
     enum_<DayCountConvention>("DayCountConvention")
@@ -372,6 +398,11 @@ EMSCRIPTEN_BINDINGS(my_module)
         .constructor<int>();
     register_vector<Date>("vector<Date>")
         .constructor<int>();
+    class_<MyClass>("MyClass")
+        .constructor<int, std::string>()
+        .function("incrementX", &MyClass::incrementX)
+        .property("x", &MyClass::getX, &MyClass::setX)
+        .class_function("getStringFromInstance", &MyClass::getStringFromInstance);
 }
 
 } // namespace
