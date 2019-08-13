@@ -98,8 +98,10 @@ function replicateSwapExample2() {
     discountCurveDfs.set(1, 0.999);
     discountCurveDfs.set(2, 0.89);
 
-    var forwardingTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, forwardCurveDfs, new Actual360());
-    var discountTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, discountCurveDfs, new Actual360());
+    var actual360 = new Actual360();
+
+    var forwardingTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, forwardCurveDfs, actual360);
+    var discountTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, discountCurveDfs, actual360);
 
     var calendar = QuantLib.Sweden;
     var convention = BusinessDayConvention.ModifiedFollowing;
@@ -139,8 +141,10 @@ function replicateSwapExample2() {
 
     var previousResetDate = Date.fromISOString("2012-11-20");
     var previousResetValue = 0.01;
+
     var euribor = new Euribor(floatTenor, forwardingTermStructure);
-    euribor.addFixing(euribor.fixingDate(previousResetDate), previousResetValue, true);
+    var previousFixingDate = euribor.fixingDate(previousResetDate);
+    euribor.addFixing(previousFixingDate, previousResetValue, true);
 
     var swap = new VanillaSwap(
         VanillaSwapType.Payer,
@@ -156,7 +160,6 @@ function replicateSwapExample2() {
     swap.setPricingEngine(discountTermStructure);
     var v = swap.NPV();
 
-    previousResetDate.delete();
     valuationDate.delete();
     maturity.delete();
     fixedTenor.delete();
@@ -171,8 +174,11 @@ function replicateSwapExample2() {
     fixedDayCount.delete();
     fixedSchedule.delete();
     floatSchedule.delete();
+    previousResetDate.delete();
     euribor.delete();
+    previousFixingDate.delete();
     swap.delete();
+    actual360.delete();
 
     return v;
 }
