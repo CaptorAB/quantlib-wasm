@@ -518,5 +518,13 @@ Add the file `c_cpp_properties.json` to the folder `.vscode` with the following 
 
 ## Useful links
 
+-   (Emscripten)[https://emscripten.org/]
+-   (Emscripten Wiki)[https://github.com/emscripten-core/emscripten/wiki]
 -   (List of other emscripten projects)[https://github.com/emscripten-core/emscripten/wiki/Porting-Examples-and-Demos]
 -   (WebAssembly Explorer)[https://mbebenita.github.io/WasmExplorer/]
+
+## Coding details
+
+-   (Memory allocation, mallinfo)[https://linux.die.net/man/3/mallinfo]
+-   (Using shared pointers)[https://docs.microsoft.com/en-us/cpp/cpp/how-to-create-and-use-shared-ptr-instances?view=vs-2019]
+-   (Difference in make-shared and normal shared-ptr)[https://stackoverflow.com/questions/20895648/difference-in-make-shared-and-normal-shared-ptr-in-c]

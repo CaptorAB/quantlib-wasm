@@ -55,7 +55,18 @@ function performanceTest() {
     console.log("WebAssembly excl copy data " + (hrtimeDiffToMs(t1, t2) - hrtimeDiffToMs(t2, t3)));
 }
 
+function bytesDiff(m1, m0) {
+    return m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd);
+}
+
+class Dummy {
+    delete() {}
+}
+
 function replicateSwapExample2() {
+    var ms = [];
+    ms.push(QuantLib.mallinfo());
+
     const {
         Date,
         Period,
@@ -70,6 +81,7 @@ function replicateSwapExample2() {
         Actual360,
         Euribor
     } = QuantLib;
+
     var valuationDate = Date.fromISOString("2012-12-31");
     setValuationDate(valuationDate);
 
@@ -84,9 +96,9 @@ function replicateSwapExample2() {
     var floatTenor = new Period(3, TimeUnit.Months);
 
     var curveDates = new QuantLib.vector$Date$(3);
+    var curveDateObjs = [Date.fromISOString("2013-12-31"), Date.fromISOString("2024-12-31")];
     curveDates.set(0, valuationDate);
-    curveDates.set(1, Date.fromISOString("2013-12-31"));
-    curveDates.set(2, Date.fromISOString("2024-12-31"));
+    curveDateObjs.forEach((d, i) => curveDates.set(i + 1, d));
 
     var forwardCurveDfs = new QuantLib.vector$double$(3);
     forwardCurveDfs.set(0, 1);
@@ -99,13 +111,6 @@ function replicateSwapExample2() {
     discountCurveDfs.set(2, 0.89);
 
     var actual360 = new Actual360();
-    // for (let i = 0; i < 1000000; i++) {
-    //     let forwardingTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, forwardCurveDfs, actual360);
-    //     let discountTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, discountCurveDfs, actual360);
-    //     forwardingTermStructure.delete();
-    //     discountTermStructure.delete();
-    // }
-
     var forwardingTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, forwardCurveDfs, actual360);
     var discountTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, discountCurveDfs, actual360);
 
@@ -145,32 +150,10 @@ function replicateSwapExample2() {
         nextToLastDate
     );
 
-    var previousResetDate = Date.fromISOString("2012-11-20");
     var previousResetValue = 0.01;
-
     var euribor = new Euribor(floatTenor, forwardingTermStructure);
     var previousFixingDate = euribor.fixingDate(previousResetDate);
     euribor.addFixing(previousFixingDate, previousResetValue, true);
-
-    // for (let i = 0; i < 1000000; i++) {
-    //     let euribor = new Euribor(floatTenor, forwardingTermStructure);
-    //     let previousFixingDate = euribor.fixingDate(previousResetDate);
-    //     euribor.addFixing(previousFixingDate, previousResetValue, true);
-    //     // let swap = QuantLib.createVanillaSwap(
-    //     //     VanillaSwapType.Payer,
-    //     //     nominal,
-    //     //     fixedSchedule,
-    //     //     fixedRate,
-    //     //     fixedDayCount,
-    //     //     floatSchedule,
-    //     //     euribor,
-    //     //     spread,
-    //     //     floatingDayCount
-    //     // );
-    //     // swap.delete();
-    //     euribor.delete();
-    //     previousFixingDate.delete();
-    // }
 
     var swap = new VanillaSwap(
         VanillaSwapType.Payer,
@@ -186,25 +169,40 @@ function replicateSwapExample2() {
     swap.setPricingEngine(discountTermStructure);
     var v = swap.NPV();
 
-    valuationDate.delete();
-    maturity.delete();
-    fixedTenor.delete();
-    floatTenor.delete();
-    curveDates.delete();
-    forwardCurveDfs.delete();
-    discountCurveDfs.delete();
-    forwardingTermStructure.delete();
-    discountTermStructure.delete();
-    firstDate.delete();
-    nextToLastDate.delete();
-    fixedDayCount.delete();
-    fixedSchedule.delete();
-    floatSchedule.delete();
-    previousResetDate.delete();
-    euribor.delete();
-    previousFixingDate.delete();
-    swap.delete();
-    actual360.delete();
+    ms.push(QuantLib.mallinfo());
+
+    [
+        ...curveDateObjs,
+        valuationDate,
+        maturity,
+        fixedTenor,
+        floatTenor,
+        curveDates,
+        forwardCurveDfs,
+        discountCurveDfs,
+        forwardingTermStructure,
+        discountTermStructure,
+        firstDate,
+        nextToLastDate,
+        fixedDayCount,
+        fixedSchedule,
+        floatingDayCount,
+        floatSchedule,
+        previousResetDate,
+        euribor,
+        previousFixingDate,
+        swap,
+        actual360
+    ].forEach((d) => d.delete());
+
+    ms.push(QuantLib.mallinfo());
+    // ms.forEach((d) => console.log(JSON.stringify(d)));
+    // console.log(
+    //     ms
+    //         .filter((d, i) => i !== 0)
+    //         .map((d) => bytesDiff(d, ms[0]))
+    //         .join(", ")
+    // );
 
     return v;
 }
@@ -359,23 +357,52 @@ QuantLibLoader.onRuntimeInitialized = () => {
     // var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
 
     // Works fine
-    // const { MyClass } = QuantLib;
+    // const { MyClassA, MyClassB } = QuantLib;
+    // var m0, m1, m2;
     // for (let i = 0; i < 1000000; i++) {
-    //     let instance = new MyClass(10, "hello");
-    //     instance.incrementX();
-    //     let x = instance.x; // 11
-    //     instance.x = 20; // 20
-    //     let s = MyClass.getStringFromInstance(instance); // "hello"
-    //     instance.delete();
+    //     m0 = QuantLib.mallinfo();
+    //     let a = new MyClassA(10, "hello");
+    //     a.incrementX();
+    //     let x = a.x; // 11
+    //     a.x = 758; // 20
+    //     let s = MyClassA.getStringFromInstance(a); // "hello"
+    //     let b = new MyClassB(a);
+    //     // console.log(b.x);
+    //     b.x = 3;
+    //     // console.log(b.x);
+    //     if (i === 0) {
+    //         m1 = QuantLib.mallinfo();
+    //     }
+    //     a.delete();
+    //     b.delete();
+    //     if (i === 0) {
+    //         m2 = QuantLib.mallinfo();
+    //         console.log(JSON.stringify(m0));
+    //         console.log(JSON.stringify(m1));
+    //         console.log(JSON.stringify(m2));
+    //         console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd));
+    //         console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
+    //     }
     // }
 
     var v;
-    for (let i = 0; i < 3; i++) {
+    var m0 = QuantLib.mallinfo();
+    var n = 225;
+    var m1;
+    for (let i = 0; i < n; i++) {
         v = replicateSwapExample2();
+        if (i === n - 2) {
+            m1 = QuantLib.mallinfo();
+        }
     }
-    let m = QuantLib.mallinfo();
-    console.log(JSON.stringify(m));
+    var m2 = QuantLib.mallinfo();
+    console.log(JSON.stringify(m0));
+    console.log(JSON.stringify(m1));
+    console.log(JSON.stringify(m2));
+    console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
+    console.log(m2.time - m0.time);
     console.log(v);
+
     // performanceTest();
     // testDate();
 };

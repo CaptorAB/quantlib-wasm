@@ -29,16 +29,21 @@ namespace
 val emval_test_mallinfo()
 {
     const auto &i = mallinfo();
+    unsigned long t =
+        std::chrono::system_clock::now().time_since_epoch() /
+        std::chrono::milliseconds(1);
     val rv(val::object());
     rv.set("arena", val(i.arena));
     rv.set("ordblks", val(i.ordblks));
     rv.set("smblks", val(i.smblks));
     rv.set("hblks", val(i.hblks));
+    rv.set("hblkhd", val(i.hblkhd));
     rv.set("usmblks", val(i.usmblks));
     rv.set("fsmblks", val(i.fsmblks));
     rv.set("uordblks", val(i.uordblks));
     rv.set("fordblks", val(i.fordblks));
     rv.set("keepcost", val(i.keepcost));
+    rv.set("time", val(t));
     return rv;
 }
 
@@ -198,6 +203,9 @@ double stdev(vector<double> &xs)
 
 Handle<YieldTermStructure> *createLogLinearYieldTermStructure(vector<Date> &dates, vector<DiscountFactor> &discountFactor, DayCounter &dayCounter)
 {
+    // auto curve = new InterpolatedDiscountCurve<LogLinear>(dates, discountFactor, dayCounter);
+    // InterpolatedDiscountCurve<LogLinear> curve(InterpolatedDiscountCurve<LogLinear>(dates, discountFactor, dayCounter));
+    // auto yts = boost::make_shared<InterpolatedDiscountCurve<LogLinear>>(*curve);
     boost::shared_ptr<YieldTermStructure> yts(new InterpolatedDiscountCurve<LogLinear>(dates, discountFactor, dayCounter));
     return new Handle<YieldTermStructure>(yts);
 }
@@ -205,20 +213,22 @@ Handle<YieldTermStructure> *createLogLinearYieldTermStructure(vector<Date> &date
 VanillaSwap *createVanillaSwap(VanillaSwap::Type type, Real nominal, const Schedule &fixedSchedule, Rate fixedRate, DayCounter &fixedDayCount,
                                const Schedule &floatSchedule, IborIndex &iborIndex, Spread spread, DayCounter &floatingDayCount)
 {
-    cout << "createVanillaSwap1" << endl;
-    boost::shared_ptr<IborIndex> iborIndexPtr(&iborIndex);
-    cout << "createVanillaSwap2" << endl;
+    boost::shared_ptr<IborIndex> iborIndexPtr = boost::make_shared<IborIndex>(iborIndex);
     VanillaSwap *res = new VanillaSwap(type, nominal, fixedSchedule, fixedRate, fixedDayCount, floatSchedule, iborIndexPtr, spread, floatingDayCount);
-    cout << "createVanillaSwap3" << endl;
     return res;
 }
 
-class MyClass
+class MyClassA
 {
 public:
-    MyClass(int x, string y)
+    MyClassA(int x, string y)
         : x(x), y(y)
     {
+    }
+
+    ~MyClassA()
+    {
+        // cout << "MyClassA destructor" << endl;
     }
 
     void incrementX()
@@ -227,9 +237,9 @@ public:
     }
 
     int getX() const { return x; }
-    void setX(int x_) { x = x_; }
+    void setX(int value) { x = value; }
 
-    static string getStringFromInstance(const MyClass &instance)
+    static string getStringFromInstance(const MyClassA &instance)
     {
         return instance.y;
     }
@@ -239,8 +249,38 @@ private:
     string y;
 };
 
+class MyClassB
+{
+public:
+    MyClassB(MyClassA &aref)
+    {
+        // cout << "x = " << aref.getX() << endl;
+        a = std::make_shared<MyClassA>(aref);
+        // cout << "x = " << a->getX() << endl;
+    }
+
+    ~MyClassB()
+    {
+        // cout << "MyClassB destructor" << endl;
+    }
+
+    int getX() const { return a->getX(); }
+    void setX(int value) { a->setX(value); }
+
+private:
+    std::shared_ptr<MyClassA> a;
+};
+
 EMSCRIPTEN_BINDINGS(my_module)
 {
+    class_<MyClassA>("MyClassA")
+        .constructor<int, string>()
+        .function("incrementX", &MyClassA::incrementX)
+        .property("x", &MyClassA::getX, &MyClassA::setX)
+        .class_function("getStringFromInstance", &MyClassA::getStringFromInstance);
+    class_<MyClassB>("MyClassB")
+        .constructor<MyClassA &>()
+        .property("x", &MyClassB::getX, &MyClassB::setX);
     enum_<DayCountConvention>("DayCountConvention")
         .value("Thirty360", DayCountConventionThirty360)
         .value("Actual360", DayCountConventionActual360)
@@ -403,11 +443,6 @@ EMSCRIPTEN_BINDINGS(my_module)
         .constructor<int>();
     register_vector<Date>("vector<Date>")
         .constructor<int>();
-    class_<MyClass>("MyClass")
-        .constructor<int, string>()
-        .function("incrementX", &MyClass::incrementX)
-        .property("x", &MyClass::getX, &MyClass::setX)
-        .class_function("getStringFromInstance", &MyClass::getStringFromInstance);
 }
 
 } // namespace
