@@ -3,6 +3,7 @@ var QuantLib = require("./quantlib-embind");
 const dateToSerialNumber = (d) => d.getTime() / 86400000 + 25569;
 const serialNumberToDate = (n) => new Date((n - 25569) * 86400000);
 const addDays = (d, n) => new Date(d.getTime() + 86400000 * n);
+const bytesDiff = (m1, m0) => m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd);
 
 const toWasmIntVector = (arr) => {
     var v = QuantLib.createIntVector(arr.length);
@@ -53,10 +54,6 @@ function performanceTest() {
     console.log("JavaScript " + hrtimeDiffToMs(t0, t1));
     console.log("WebAssembly " + hrtimeDiffToMs(t1, t2));
     console.log("WebAssembly excl copy data " + (hrtimeDiffToMs(t1, t2) - hrtimeDiffToMs(t2, t3)));
-}
-
-function bytesDiff(m1, m0) {
-    return m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd);
 }
 
 class Dummy {

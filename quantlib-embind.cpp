@@ -56,8 +56,9 @@ enum DayCountConvention
     DayCountConventionBusiness252
 };
 
-const Calendar swedenCalendar = Sweden();
+const Calendar TARGETCalendar = TARGET();
 const Calendar nullCalendar = NullCalendar();
+const Calendar swedenCalendar = Sweden();
 
 void setValuationDate(Date &date)
 {
@@ -102,11 +103,23 @@ double swapNpv(VanillaSwap &swap)
     return swap.NPV();
 }
 
-string toISOString(Date &d)
+string calendarToISOString(Date &d)
 {
     stringstream stream;
     stream << d.year() << "-" << setfill('0') << setw(2) << (int)d.month() << "-" << setfill('0') << setw(2) << d.dayOfMonth();
     return stream.str();
+}
+
+string calendarToString(Date &d)
+{
+    stringstream stream;
+    stream << d;
+    return stream.str();
+}
+
+Date calendarAdvance(Calendar &cal, Date &d, Integer n, TimeUnit unit, BusinessDayConvention c, bool endOfMonth)
+{
+    return cal.advance(d, n, unit, c, endOfMonth);
 }
 
 // std::shared_ptr<Date> fromISOString(string s)
@@ -271,7 +284,7 @@ private:
     std::shared_ptr<MyClassA> a;
 };
 
-EMSCRIPTEN_BINDINGS(my_module)
+EMSCRIPTEN_BINDINGS(quantlib)
 {
     class_<MyClassA>("MyClassA")
         .constructor<int, string>()
@@ -373,20 +386,21 @@ EMSCRIPTEN_BINDINGS(my_module)
         .value("Thu", Thu)
         .value("Fri", Fri)
         .value("Sat", Sat);
-    emscripten::constant("Sweden", swedenCalendar);
+    emscripten::constant("TARGET", TARGETCalendar);
     emscripten::constant("NullCalendar", nullCalendar);
+    emscripten::constant("Sweden", swedenCalendar);
     class_<Date>("Date")
         .constructor<>()
         .constructor<int>()
         .constructor<int, Month, int>()
-        // .smart_ptr_constructor("Date", &std::make_shared<C>)
         .function("serialNumber", &Date::serialNumber)
         .function("weekday", &Date::weekday)
         .function("dayOfMonth", &Date::dayOfMonth)
         .function("dayOfYear", &Date::dayOfYear)
         .function("month", &Date::month)
         .function("year", &Date::year)
-        .function("toISOString", &toISOString)
+        .function("toISOString", &calendarToISOString)
+        .function("toString", &calendarToString)
         .class_function("fromISOString", &dateFromISOString, allow_raw_pointers())
         .class_function("isLeap", &Date::isLeap);
     class_<Schedule>("Schedule")
@@ -396,7 +410,10 @@ EMSCRIPTEN_BINDINGS(my_module)
         .function("dates", &Schedule::dates);
     class_<Calendar>("Calendar")
         .function("name", &Calendar::name)
-        .function("isBusinessDay", &Calendar::isBusinessDay);
+        .function("toString", &calendarToString)
+        .function("isBusinessDay", &Calendar::isBusinessDay)
+        .function("adjust", &Calendar::adjust)
+        .function("advance", &calendarAdvance);
     class_<Period>("Period")
         .constructor<int, TimeUnit>()
         .function("toString", &timeUnitToString);

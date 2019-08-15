@@ -13,7 +13,7 @@ See note on 'Share folder' (Windows only) below.
 Then:
 
 ```
-docker run -v ${pwd}:/src -it captorab/emscripten-quantlib:1.15.2 /bin/bash
+docker run -v ${pwd}:/src -it --rm captorab/emscripten-quantlib:1.15.2 /bin/bash
 ```
 
 Or continue execute and existing continer. Search with `docker ps -a`.
