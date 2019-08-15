@@ -3,7 +3,7 @@
 ### Pull from docker
 
 ```
-docker pull captorab/emscripten-quantlib:1.15.2
+docker pull captorab/emscripten-quantlib:1.16.1
 ```
 
 ### Run the container
@@ -13,7 +13,7 @@ See note on 'Share folder' (Windows only) below.
 Then:
 
 ```
-docker run -v ${pwd}:/src -it --rm captorab/emscripten-quantlib:1.15.2 /bin/bash
+docker run -v ${pwd}:/src -it --rm captorab/emscripten-quantlib:1.16.1 /bin/bash
 ```
 
 Or continue execute and existing continer. Search with `docker ps -a`.
@@ -155,7 +155,7 @@ ldconfig
 Build using `Dockerfile` in the same folder.
 
 ```
-docker build -t docker.io/captorab/emscripten-quantlib:1.15.2 .
+docker build -t docker.io/captorab/emscripten-quantlib:1.16.1 .
 ```
 
 Run it (update the container id):
