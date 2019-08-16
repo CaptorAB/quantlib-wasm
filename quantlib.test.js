@@ -1,4 +1,4 @@
-var QuantLibModule = require("./dist/quantlib");
+var QuantLibModule = require(".");
 
 var QuantLib = null;
 const bytesDiff = (m0, m1) => m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd);

@@ -1,3 +1,2 @@
-exports.printMsg = function() {
-  console.log("This is a message from node-quantlib package. Placeholder");
-}
+const QuantLib = require("./dist/quantlib");
+module.exports = QuantLib;

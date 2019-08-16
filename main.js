@@ -1,4 +1,4 @@
-var QuantLib = require("./dist/quantlib");
+var QuantLib = require(".");
 
 const dateToSerialNumber = (d) => d.getTime() / 86400000 + 25569;
 const serialNumberToDate = (n) => new Date((n - 25569) * 86400000);
@@ -337,70 +337,76 @@ function testSchedule() {
     [previousResetDate, maturity, fixedTenor, firstDate, nextToLastDate].forEach((d) => d.delete());
 }
 
-var QuantLibLoader = QuantLib();
-QuantLibLoader.onRuntimeInitialized = () => {
-    QuantLib = QuantLibLoader;
+// var QuantLibLoader = QuantLib();
+// QuantLibLoader.onRuntimeInitialized = () => {
+//     QuantLib = QuantLibLoader;
 
-    // testVector();
-    // var d = new QuantLib.Date(34000);
-    // console.log(d.toISOString());
-    // generateSchedule();
-    // BusinessDayConvention terminationDateConvention, DateGeneration::Rule rule, bool endOfMonth,
-    // int firstDateAsSerialNumber = 0, int nextToLastDateAsSerialNumber = 0
-    // var arr = [...Array(100000)].map((d, i) => i + 1);
-    // for (let index = 0; index < 1000; index++) {
-    // 	let a = toWasmDoubleVector(arr);
-    // 	let v = QuantLib.stdev(a);
-    // 	a.delete();
-    // }
-    // var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
+//     // testVector();
+//     // var d = new QuantLib.Date(34000);
+//     // console.log(d.toISOString());
+//     // generateSchedule();
+//     // BusinessDayConvention terminationDateConvention, DateGeneration::Rule rule, bool endOfMonth,
+//     // int firstDateAsSerialNumber = 0, int nextToLastDateAsSerialNumber = 0
+//     // var arr = [...Array(100000)].map((d, i) => i + 1);
+//     // for (let index = 0; index < 1000; index++) {
+//     // 	let a = toWasmDoubleVector(arr);
+//     // 	let v = QuantLib.stdev(a);
+//     // 	a.delete();
+//     // }
+//     // var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
 
-    // Works fine
-    // const { MyClassA, MyClassB } = QuantLib;
-    // var m0, m1, m2;
-    // for (let i = 0; i < 1000000; i++) {
-    //     m0 = QuantLib.mallinfo();
-    //     let a = new MyClassA(10, "hello");
-    //     a.incrementX();
-    //     let x = a.x; // 11
-    //     a.x = 758; // 20
-    //     let s = MyClassA.getStringFromInstance(a); // "hello"
-    //     let b = new MyClassB(a);
-    //     // console.log(b.x);
-    //     b.x = 3;
-    //     // console.log(b.x);
-    //     if (i === 0) {
-    //         m1 = QuantLib.mallinfo();
-    //     }
-    //     a.delete();
-    //     b.delete();
-    //     if (i === 0) {
-    //         m2 = QuantLib.mallinfo();
-    //         console.log(JSON.stringify(m0));
-    //         console.log(JSON.stringify(m1));
-    //         console.log(JSON.stringify(m2));
-    //         console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd));
-    //         console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
-    //     }
-    // }
+//     // Works fine
+//     // const { MyClassA, MyClassB } = QuantLib;
+//     // var m0, m1, m2;
+//     // for (let i = 0; i < 1000000; i++) {
+//     //     m0 = QuantLib.mallinfo();
+//     //     let a = new MyClassA(10, "hello");
+//     //     a.incrementX();
+//     //     let x = a.x; // 11
+//     //     a.x = 758; // 20
+//     //     let s = MyClassA.getStringFromInstance(a); // "hello"
+//     //     let b = new MyClassB(a);
+//     //     // console.log(b.x);
+//     //     b.x = 3;
+//     //     // console.log(b.x);
+//     //     if (i === 0) {
+//     //         m1 = QuantLib.mallinfo();
+//     //     }
+//     //     a.delete();
+//     //     b.delete();
+//     //     if (i === 0) {
+//     //         m2 = QuantLib.mallinfo();
+//     //         console.log(JSON.stringify(m0));
+//     //         console.log(JSON.stringify(m1));
+//     //         console.log(JSON.stringify(m2));
+//     //         console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd));
+//     //         console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
+//     //     }
+//     // }
 
-    // var v;
-    // var m0 = QuantLib.mallinfo();
-    // var n = 225;
-    // var m1;
-    // for (let i = 0; i < n; i++) {
-    //     v = replicateSwapExample2();
-    //     if (i === n - 2) {
-    //         m1 = QuantLib.mallinfo();
-    //     }
-    // }
-    // var m2 = QuantLib.mallinfo();
-    // console.log(JSON.stringify(m0));
-    // console.log(JSON.stringify(m1));
-    // console.log(JSON.stringify(m2));
-    // console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
-    // console.log(m2.time - m0.time);
-    // console.log(v);
+//     // var v;
+//     // var m0 = QuantLib.mallinfo();
+//     // var n = 225;
+//     // var m1;
+//     // for (let i = 0; i < n; i++) {
+//     //     v = replicateSwapExample2();
+//     //     if (i === n - 2) {
+//     //         m1 = QuantLib.mallinfo();
+//     //     }
+//     // }
+//     // var m2 = QuantLib.mallinfo();
+//     // console.log(JSON.stringify(m0));
+//     // console.log(JSON.stringify(m1));
+//     // console.log(JSON.stringify(m2));
+//     // console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
+//     // console.log(m2.time - m0.time);
+//     // console.log(v);
 
-    testSchedule();
+//     // testSchedule();
+// };
+
+var loader = QuantLib();
+loader.onRuntimeInitialized = () => {
+    QuantLib = loader;
+    console.log(`QuantLib v${QuantLib.version} loaded`);
 };

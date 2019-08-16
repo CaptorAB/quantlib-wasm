@@ -1,7 +1,7 @@
 {
     "name": "quantlib-wasm",
-    "version": "0.0.3",
-    "description": "Quantlib for NodeJS through WebAssembly",
+    "version": "0.0.4",
+    "description": "A WebAssembly implementation of QuantLib for use in browser and Node.JS",
     "main": "index.js",
     "scripts": {
         "test": "jest quantlib.test.js --detectOpenHandles --maxWorkers=1 --forceExit"
@@ -11,9 +11,11 @@
         "url": "git+https://github.com/CaptorAB/node-quantlib.git"
     },
     "keywords": [
-        "Quantlib",
-        "Node",
-        "WebAssembly"
+        "quantlib",
+        "wasm",
+        "webassembly",
+        "quantitative",
+        "finance"
     ],
     "author": "captor.se",
     "license": "BSD-3-Clause-Attribution",
