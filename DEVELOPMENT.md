@@ -531,6 +531,7 @@ Add the file `c_cpp_properties.json` to the folder `.vscode` with the following 
 
 ## Coding details
 
+-   (Using WebAssembly with React)[https://dev.to/brightdevs/using-webassembly-with-react-1led]
 -   (Memory allocation, mallinfo)[https://linux.die.net/man/3/mallinfo]
 -   (Using shared pointers)[https://docs.microsoft.com/en-us/cpp/cpp/how-to-create-and-use-shared-ptr-instances?view=vs-2019]
 -   (Difference in make-shared and normal shared-ptr)[https://stackoverflow.com/questions/20895648/difference-in-make-shared-and-normal-shared-ptr-in-c]
