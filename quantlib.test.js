@@ -1,20 +1,7 @@
 var QuantLibModule = require("./quantlib-embind");
 
 var QuantLib = null;
-var Date,
-    Weekday,
-    Period,
-    TimeUnit,
-    BusinessDayConvention,
-    DateGenerationRule,
-    Schedule,
-    VanillaSwapType,
-    VanillaSwap,
-    setValuationDate,
-    Thirty360,
-    Actual360,
-    Euribor;
-const bytesDiff = (m1, m0) => m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd);
+const bytesDiff = (m0, m1) => m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd);
 
 describe("captor/quantlib", () => {
     beforeAll(async () => {
@@ -29,19 +16,6 @@ describe("captor/quantlib", () => {
                 });
             });
         QuantLib = await loader.ready();
-        Date = QuantLib.Date;
-        Weekday = QuantLib.Weekday;
-        Period = QuantLib.Period;
-        TimeUnit = QuantLib.TimeUnit;
-        BusinessDayConvention = QuantLib.BusinessDayConvention;
-        DateGenerationRule = QuantLib.DateGenerationRule;
-        Schedule = QuantLib.Schedule;
-        VanillaSwapType = QuantLib.VanillaSwapType;
-        VanillaSwap = QuantLib.VanillaSwap;
-        setValuationDate = QuantLib.setValuationDate;
-        Thirty360 = QuantLib.Thirty360;
-        Actual360 = QuantLib.Actual360;
-        Euribor = QuantLib.Euribor;
     });
 
     test("Sweden Calendar", async () => {
@@ -49,12 +23,14 @@ describe("captor/quantlib", () => {
     });
 
     test("Calendar weekday", async () => {
+        const { Date, Weekday } = QuantLib;
         var settlementDate = Date.fromISOString("2008-09-18");
         expect(settlementDate.weekday().value).toBe(Weekday.Thursday.value);
         settlementDate.delete();
     });
 
     test("Calendar adjust and advance", async () => {
+        const { Date, BusinessDayConvention, TimeUnit } = QuantLib;
         // var ms = [];
         // ms.push(QuantLib.mallinfo());
         var settlementDate = Date.fromISOString("2008-09-18");
@@ -69,8 +45,35 @@ describe("captor/quantlib", () => {
         // console.log(
         //     ms
         //         .filter((d, i) => i !== 0)
-        //         .map((d) => bytesDiff(d, ms[0]))
+        //         .map((d) => bytesDiff(ms[0], d))
         //         .join(", ")
         // );
+    });
+
+    test("Date", async () => {
+        const { Date, Month } = QuantLib;
+        var myDate = new Date(12, Month.Aug, 2009);
+        expect(myDate.toISOString()).toBe("2009-08-12");
+        expect(myDate.weekday().value).toBe(4);
+        expect(myDate.dayOfMonth()).toBe(12);
+        expect(myDate.dayOfYear()).toBe(224);
+        expect(myDate.month().value).toBe(8);
+        expect(myDate.year()).toBe(2009);
+        expect(myDate.serialNumber()).toBe(40037);
+    });
+
+    test("Vector", async () => {
+        const { Vector$double$ } = QuantLib;
+        var m0 = QuantLib.mallinfo();
+        for (let i = 0; i < 5; i++) {
+            let n = 100000;
+            let arr = new Vector$double$(n);
+            for (let j = 0; j < n; j++) {
+                arr.set(j, j + 1);
+            }
+            arr.delete();
+        }
+        var m1 = QuantLib.mallinfo();
+        expect(bytesDiff(m0, m1)).toBe(0);
     });
 });

@@ -334,6 +334,10 @@ EMSCRIPTEN_BINDINGS(quantlib)
         .value("Nov", Nov)
         .value("Dec", Dec);
     enum_<TimeUnit>("TimeUnit")
+        .value("D", Days)
+        .value("W", Weeks)
+        .value("M", Months)
+        .value("Y", Years)
         .value("Days", Days)
         .value("Weeks", Weeks)
         .value("Months", Months)
@@ -452,13 +456,11 @@ EMSCRIPTEN_BINDINGS(quantlib)
     emscripten::function("mallinfo", &emval_test_mallinfo);
     emscripten::function("setValuationDate", &setValuationDate);
     emscripten::function("createLogLinearYieldTermStructure", &createLogLinearYieldTermStructure, allow_raw_pointers());
-    register_vector<int>("vector<int>")
+    register_vector<int>("Vector<int>")
         .constructor<int>();
-    register_vector<double>("vector<double>")
-        // .smart_ptr<std::shared_ptr<vector<double>>>("std::shared_ptr<vector<double>>")
-        // .smart_ptr_constructor("std::shared_ptr<vector<double>>", &std::make_shared<vector<double>, int>);
+    register_vector<double>("Vector<double>")
         .constructor<int>();
-    register_vector<Date>("vector<Date>")
+    register_vector<Date>("Vector<Date>")
         .constructor<int>();
 }
 
