@@ -284,7 +284,7 @@ private:
     std::shared_ptr<MyClassA> a;
 };
 
-EMSCRIPTEN_BINDINGS(quantlib)
+EMSCRIPTEN_BINDINGS(dev)
 {
     class_<MyClassA>("MyClassA")
         .constructor<int, string>()
@@ -294,6 +294,11 @@ EMSCRIPTEN_BINDINGS(quantlib)
     class_<MyClassB>("MyClassB")
         .constructor<MyClassA &>()
         .property("x", &MyClassB::getX, &MyClassB::setX);
+}
+
+EMSCRIPTEN_BINDINGS(quantlib)
+{
+    emscripten::constant<string>("version", QL_VERSION);
     enum_<DayCountConvention>("DayCountConvention")
         .value("Thirty360", DayCountConventionThirty360)
         .value("Actual360", DayCountConventionActual360)

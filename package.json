@@ -1,6 +1,6 @@
 {
     "name": "quantlib-wasm",
-    "version": "0.0.1",
+    "version": "0.0.3",
     "description": "Quantlib for NodeJS through WebAssembly",
     "main": "index.js",
     "scripts": {
@@ -31,9 +31,6 @@
         "prettier-eslint-cli": "4.7.1"
     },
     "jest": {
-        "setupFilesAfterEnv": [
-            "<rootDir>/jest.setup.js"
-        ],
         "verbose": true,
         "testEnvironment": "node",
         "testPathIgnorePatterns": [

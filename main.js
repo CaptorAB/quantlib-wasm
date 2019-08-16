@@ -1,4 +1,4 @@
-var QuantLib = require("./quantlib-embind");
+var QuantLib = require("./dist/quantlib");
 
 const dateToSerialNumber = (d) => d.getTime() / 86400000 + 25569;
 const serialNumberToDate = (n) => new Date((n - 25569) * 86400000);

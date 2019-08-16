@@ -1,0 +1,12 @@
+.vscode
+examples
+emscripten-bindings
+.eslintrc.js
+.circleci/config.yml
+
+quantlib-embind.cpp
+quantlib.test.js
+DEVELOPMENT.md
+Dockerfile
+main.js
+Makefile

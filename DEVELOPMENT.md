@@ -121,8 +121,8 @@ c++ -I${BOOST} boost-hello-world.cpp -o boost-hello-world
 In the container (bash). See [QuantLib on Linux](https://www.quantlib.org/install/linux.shtml):
 
 ```bash
-wget https://bintray.com/quantlib/releases/download_file?file_path=QuantLib-1.15.tar.gz -O QuantLib-1.15.tar.gz
-tar xzf QuantLib-1.15.tar.gz -C /quantlib
+wget https://bintray.com/quantlib/releases/download_file?file_path=QuantLib-1.16.tar.gz -O QuantLib-1.16.tar.gz
+tar xzf QuantLib-1.16.tar.gz -C /quantlib
 QUANTLIB=/quantlib
 cd $QUANTLIB
 ```
@@ -167,7 +167,7 @@ docker run -v ${pwd}:/src -it quantlib/emscripten /bin/bash
 On MacOSX
 
 ```
-docker run --mount type=bind,source="${PWD}",target=/src -it captorab/emscripten-quantlib:1.15.2 /bin/bash
+docker run --mount type=bind,source="${PWD}",target=/src -it captorab/emscripten-quantlib:1.16.1 /bin/bash
 ```
 
 ### Compile emscripten with boost
@@ -197,8 +197,8 @@ rm -rf /usr/local/lib/libQuant*.*
 ### Build Quantlibs BermudanSwaption example
 
 ```
-QUANTLIB=/src/QuantLib-1.15
-cd QuantLib-1.15/Examples/BermudanSwaption/
+QUANTLIB=/src/QuantLib-1.16
+cd QuantLib-1.16/Examples/BermudanSwaption/
 emcc BermudanSwaption.cpp -o BermudanSwaption.js -std=c++11 -I${BOOST} -L${BOOST}/lib/emscripten -I${QUANTLIB} -I${QUANTLIB}/ql
 ```
 
@@ -234,7 +234,7 @@ ldconfig: /usr/local/lib/libQuantLib.so is not an ELF file - it has the wrong ma
 
 ```
 BOOST=/src/boost_1_70_0
-QUANTLIB=/src/QuantLib-1.15
+QUANTLIB=/src/QuantLib-1.16
 emcc -I${QUANTLIB} -I${BOOST} -O2 -o hello-boost.js hello-boost.cpp
 emcc -I${QUANTLIB} -I${BOOST} -o hello-quantlib.js hello-quantlib.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 ```
