@@ -1,3 +1,5 @@
+[![NPM](https://nodei.co/npm/quantlib-wasm.png?downloads=true&downloadRank=true)](https://nodei.co/npm/quantlib-wasm)
+
 [![CircleCI](https://circleci.com/gh/CaptorAB/quantlib-wasm/tree/master.svg?style=svg)](https://circleci.com/gh/CaptorAB/quantlib-wasm/tree/master)
 [![npm version](https://badge.fury.io/js/quantlib-wasm.svg)](https://badge.fury.io/js/quantlib-wasm)
 
