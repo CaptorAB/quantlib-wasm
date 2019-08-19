@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/CaptorAB/quantlib-wasm/tree/master.svg?style=svg)](https://circleci.com/gh/CaptorAB/quantlib-wasm/tree/master)
+[![npm version](https://badge.fury.io/js/quantlib-wasm.svg)](https://badge.fury.io/js/quantlib-wasm)
 
 # quantlib-wasm
 
