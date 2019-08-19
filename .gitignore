@@ -37,6 +37,8 @@
 *.gz
 *.bz2
 
+dist
+
 examples/*.js
 examples/*.wasm
 examples/*.html
