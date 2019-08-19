@@ -107,7 +107,7 @@ console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd)); // Should prin
 
 ## Status
 
-Which objects and functions are exported? There is no documentation written yet. Until this project turns into beta mode, the only reliable way is to check the code. In this case the binding file is the right place. It's found [here](https://github.com/CaptorAB/quantlib-wasm/blob/master/quantlib-embind.cpp).
+Which objects and functions are exported? There is no documentation written yet. Until this project turns into alpha mode, the only reliable way is to check the code. In this case the binding file is the right place. It's found [here](https://github.com/CaptorAB/quantlib-wasm/blob/master/quantlib-embind.cpp).
 
 ## Versioning
 

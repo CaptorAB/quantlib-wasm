@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.16.1
+
+-   Fixed build:wasm with makefile
+
 ## 0.0.6
 
 -   Added npm script build:wasm
