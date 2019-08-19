@@ -13,6 +13,5 @@ int main(int, char *[])
 {
     Date date(15, May, 2019);
     cout << "HELLO " << date << endl;
-
     return 0;
 }
