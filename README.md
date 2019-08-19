@@ -65,7 +65,7 @@ Code like the example below cannot be used because it hides the destructor of th
 console.log(Date.fromISOString("2019-08-19").toString()); // This causes a memory leak.
 ```
 
-Here is a correct equivalent:
+Here is the correct equivalent:
 
 ```JavaScript
 var date = Date.fromISOString("2019-08-19");
