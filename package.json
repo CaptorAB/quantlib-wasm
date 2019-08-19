@@ -1,10 +1,11 @@
 {
     "name": "quantlib-wasm",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "A WebAssembly implementation of QuantLib for use in browser and Node.js",
     "main": "index.js",
     "scripts": {
-        "test": "jest quantlib.test.js --detectOpenHandles --maxWorkers=1 --forceExit"
+        "test": "jest quantlib.test.js --detectOpenHandles --maxWorkers=1 --forceExit",
+        "build:wasm": "cross-var docker run -v $INIT_CWD:/src -it --rm captorab/emscripten-quantlib:1.16.1 /bin/bash -c \"emcc --bind -I${EMSCRIPTEN}/system/include -I${QUANTLIB} -I${BOOST} -O3 -s MODULARIZE=1 -s \"EXTRA_EXPORTED_RUNTIME_METHODS=['addOnPostRun']\" -s EXPORT_NAME=QuantLib -s TOTAL_MEMORY=64MB -o dist/quantlib.js quantlib-embind.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a\""
     },
     "repository": {
         "type": "git",
@@ -24,12 +25,13 @@
     },
     "homepage": "https://github.com/CaptorAB/node-quantlib#readme",
     "devDependencies": {
-        "jest": "^24.8.0",
-        "jest-cli": "24.8.0",
+        "cross-var": "^1.1.0",
         "eslint": "5.12.0",
         "eslint-config-prettier": "^4.0.0",
         "eslint-config-standard": "^12.0.0",
         "eslint-plugin-jest": "^22.3.2",
+        "jest": "^24.8.0",
+        "jest-cli": "24.8.0",
         "prettier-eslint-cli": "4.7.1"
     },
     "jest": {

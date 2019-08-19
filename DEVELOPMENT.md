@@ -519,6 +519,8 @@ Add the file `c_cpp_properties.json` to the folder `.vscode` with the following 
 ## Useful links Emscripten / WebAssembly
 
 -   (Emscripten)[https://emscripten.org/]
+-   (WebAssmebly)[https://webassembly.eu/]
+-   (AssemblyScript)[https://docs.assemblyscript.org/]
 -   (Emscripten Wiki)[https://github.com/emscripten-core/emscripten/wiki]
 -   (List of other emscripten projects)[https://github.com/emscripten-core/emscripten/wiki/Porting-Examples-and-Demos]
 -   (WebAssembly Explorer)[https://mbebenita.github.io/WasmExplorer/]
