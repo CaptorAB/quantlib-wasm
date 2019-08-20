@@ -1,3 +1,5 @@
+[![NPM](https://nodei.co/npm/quantlib-wasm.png?downloads=true&downloadRank=true)](https://nodei.co/npm/quantlib-wasm)
+
 [![CircleCI](https://circleci.com/gh/CaptorAB/quantlib-wasm/tree/master.svg?style=svg)](https://circleci.com/gh/CaptorAB/quantlib-wasm/tree/master)
 [![npm version](https://badge.fury.io/js/quantlib-wasm.svg)](https://badge.fury.io/js/quantlib-wasm)
 
@@ -27,15 +29,15 @@ loader.onRuntimeInitialized = () => {
 
 ## Introduction
 
-[Quantlib](https://www.quantlib.org/) is a quantitative finance library, used for pricing, hedging and valuation of finacial sequrities and derivatives. It's open source and widely used. The library is written in C++ and it has been exported to many languages such as Python, Java and C#.
+[Quantlib](https://www.quantlib.org/) is a quantitative finance library, used for pricing, hedging and valuation of financial sequrities and derivatives. It's open source and widely used. The library is written in C++ and it has been exported to many languages such as Python, Java and C#.
 
 How about exporting QuantLib to JavaScript? In Node.js there are many ways of importing external libraries, including node-gyp, addons and N-API. None of these techniques work client side in a browser. WebAssembly on the other hand, works both client and server-side.
 
-[WebAssembly](https://webassembly.org/) (Wasm) is a sandboxed environment running inside the JavaScript virtual machine. High-level languages like C/C++ can be compiled into the Wasm. WebAssembly is supported by four major browsers (Chrome, Firefox, Safari and Edge). Therefore, using WebAssembly QuantLib can be used from JavaScript both client (web browser) and server-side (Node.js).
+[WebAssembly](https://webassembly.org/) (Wasm) is a sandboxed environment running inside the JavaScript virtual machine. High-level languages like C/C++ can be compiled into the Wasm. WebAssembly is supported by four major browsers (Chrome, Firefox, Safari and Edge). Therefore, QuantLib as WebAssembly can be used from JavaScript both client (web browser) and server-side (Node.js).
 
 ## Working with QuantLib in JavaScript
 
-QuantLib is an object oriented library, rather than functional oriented. The QuantLib calculations are done with many objects, such as Date, Calendar, Schedule, PricingEngine, YieldCurve and all kind of instrument objects. These objects can be exported to and used in JavaScript. The code in JavaScript will be similar to versions in Python or C++.
+QuantLib is an object oriented library, rather than functional oriented. The QuantLib calculations are done with many objects, such as Date, Calendar, Schedule, PricingEngine, YieldCurve and all kind of instrument objects. These objects can be exported and used in JavaScript. The code in JavaScript will be similar to versions in Python or C++.
 
 Here is a schedule generator example:
 
