@@ -1,6 +1,6 @@
 {
     "name": "quantlib-wasm",
-    "version": "1.16.1",
+    "version": "1.16.2",
     "description": "A WebAssembly implementation of QuantLib for use in browser and Node.js",
     "main": "index.js",
     "scripts": {
