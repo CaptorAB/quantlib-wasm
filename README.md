@@ -70,7 +70,7 @@ for (let i = 0; i < dates.size(); i++) {
 
 ## Emscripten
 
-This implementation uses Emscripten to compile QuantLib. Emscripten compiles C++ into low level JavaScript called asm.js, which is highly optimizable and can be executed at close to native speed. A [long list of projects](https://github.com/emscripten-core/emscripten/wiki/Porting-Examples-and-Demos) have already been using Emscripten to port codebases to JavaScript.
+This implementation uses Emscripten to compile QuantLib. Emscripten compiles C++ into low level JavaScript called asm.js, which is highly optimizable and can be executed at close to native speed. A [long list of projects](https://github.com/emscripten-core/emscripten/wiki/Porting-Examples-and-Demos) are already using Emscripten to port codebases to JavaScript.
 
 Embind is used to bind C++ functions and classes to JavaScript. The bindings are done with a few lines of code. The technique for defining bindings is similar to Boost Python.
 
