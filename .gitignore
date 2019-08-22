@@ -45,3 +45,5 @@ examples/*.html
 
 package-lock.json
 node_modules
+
+.vscode/c_cpp_properties.json

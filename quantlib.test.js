@@ -56,20 +56,17 @@ describe("captor/quantlib", () => {
 
     test("DayCounters", async () => {
         const { Date, Month, Thirty360, Actual360, Actual365Fixed, ActualActual, Business252 } = QuantLib;
-        var m0 = QuantLib.mallinfo();
         var start = new Date(22, Month.January, 2017);
         var end = new Date(22, Month.August, 2019);
 
         var expects = [930, 942, 942, 942, 645];
-        [Thirty360, Actual360, Actual365Fixed, ActualActual, Business252 /**/].forEach((type, i) => {
+        [Thirty360, Actual360, Actual365Fixed, ActualActual, Business252].forEach((type, i) => {
             var dc = new type();
             var d = dc.dayCount(start, end);
             expect(d).toBe(expects[i]);
             dc.delete();
         });
         [start, end].forEach((d) => d.delete());
-        var m1 = QuantLib.mallinfo();
-        console.log(bytesDiff(m0, m1));
     });
 
     test("Vector", async () => {

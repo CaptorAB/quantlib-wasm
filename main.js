@@ -304,46 +304,89 @@ function generateSchedule() {
 }
 
 function eoniaCurveBootstrapping() {
-    const { Date, Period, TimeUnit, BusinessDayConvention, DateGenerationRule, Schedule, Month, setValuationDate, SimpleQuote } = QuantLib;
-    const { TARGET, QuoteHandle, DepositRateHelper, Thirty360 } = QuantLib;
-    const { Actual360, Actual365Fixed, ActualActual, Business252 } = QuantLib;
-    const { Years, Months, Days } = TimeUnit;
+    const { Date, Period, TimeUnit, BusinessDayConvention, Schedule, Month, setValuationDate, SimpleQuote } = QuantLib;
+    const { TARGET, QuoteHandle, DepositRateHelper, OISRateHelper, DatedOISRateHelper } = QuantLib;
+    const { Actual360, Eonia } = QuantLib;
+    const { Years, Months, Weeks, Days } = TimeUnit;
     const { Following } = BusinessDayConvention;
+    const { January, February, March, April, May, June, July, August, September, October, November, December } = Month;
 
     var today = new Date(11, Month.December, 2002);
-    var end = new Date(11, Month.December, 2004);
-
-    var m0 = QuantLib.mallinfo();
-    var start = new Date(22, Month.January, 2017);
-    var end = new Date(22, Month.August, 2019);
-    console.log(bytesDiff(m0, QuantLib.mallinfo()));
-
-    var expects = [930, 942, 942, 942, 645];
-    [Thirty360, Actual360, Actual365Fixed, ActualActual /*, Business252 */].forEach((type, i) => {
-        var dc = new type();
-        var d = dc.dayCount(start, end);
-        console.log(d);
-        dc.delete();
-    });
-    [start, end].forEach((d) => d.delete());
-    var m1 = QuantLib.mallinfo();
-    console.log(bytesDiff(m0, m1));
 
     setValuationDate(today);
-    var dc = new Thirty360();
-    console.log(dc.dayCount(start, end));
-
     var calendar = new TARGET();
+    var dc = new Actual360();
 
-    var rates = [0.04, 0.04, 0.04];
+    var depositRates = [0.04, 0.04, 0.04];
     var fixingDays = [0, 1, 2];
     var period = new Period(1, Days);
 
-    var helpers = rates.map((rate, i) => {
+    var helpers = [];
+
+    depositRates.forEach((rate, i) => {
         var fixingDay = fixingDays[i];
-        var quote = new SimpleQuote(rate);
-        var quoteHandle = new QuoteHandle(quote);
-        return new DepositRateHelper(quoteHandle, period, fixingDay, calendar, Following, false);
+        var quoteHandle = new QuoteHandle(rate / 100);
+        helpers.push(new DepositRateHelper(quoteHandle, period, fixingDay, calendar, Following, false, dc));
+    });
+
+    var eonia = new Eonia();
+
+    var shortOisData = [[0.07, 1, Weeks], [0.069, 2, Weeks], [0.078, 3, Weeks], [0.074, 1, Months]];
+    shortOisData.forEach((data, i) => {
+        var quoteHandle = new QuoteHandle(data[0] / 100);
+        var tenor = new Period(data[1], data[2]);
+        helpers.push(new OISRateHelper(2, tenor, quoteHandle, eonia));
+    });
+
+    var datedOisData = [
+        [0.046, new Date(16, January, 2013), new Date(13, February, 2013)],
+        [0.016, new Date(13, February, 2013), new Date(13, March, 2013)],
+        [-0.007, new Date(13, March, 2013), new Date(10, April, 2013)],
+        [-0.013, new Date(10, April, 2013), new Date(8, May, 2013)],
+        [-0.014, new Date(8, May, 2013), new Date(12, June, 2013)]
+    ];
+    datedOisData.forEach((data, i) => {
+        var quoteHandle = new QuoteHandle(data[0] / 100);
+        helpers.push(new DatedOISRateHelper(data[1], data[2], quoteHandle, eonia));
+    });
+
+    // In [8]: helpers += [ OISRateHelper(2, Period(*tenor),
+    //     QuoteHandle(SimpleQuote(rate/100)), eonia)
+    //     for rate, tenor in [(0.002, (15,Months)), (0.008, (18,Months)),
+    //     (0.021, (21,Months)), (0.036, (2,Years)),
+    //     (0.127, (3,Years)), (0.274, (4,Years)),
+    //     (0.456, (5,Years)), (0.647, (6,Years)),
+    //     (0.827, (7,Years)), (0.996, (8,Years)),
+    //     (1.147, (9,Years)), (1.280, (10,Years)),
+    //     (1.404, (11,Years)), (1.516, (12,Years)),
+    //     (1.764, (15,Years)), (1.939, (20,Years)),
+    //     (2.003, (25,Years)), (2.038, (30,Years))] ]
+
+    var longOisData = [
+        [0.002, 15, Months],
+        [0.008, 18, Months],
+        [0.021, 21, Months],
+        [0.036, 2, Years],
+        [0.127, 3, Years],
+        [0.274, 4, Years],
+        [0.456, 5, Years],
+        [0.647, 6, Years],
+        [0.827, 7, Years],
+        [0.996, 8, Years],
+        [1.147, 9, Years],
+        [1.28, 10, Years],
+        [1.404, 11, Years],
+        [1.516, 12, Years],
+        [1.764, 15, Years],
+        [1.939, 20, Years],
+        [2.003, 25, Years],
+        [2.038, 30, Years]
+    ];
+
+    longOisData.forEach((data, i) => {
+        var quoteHandle = new QuoteHandle(data[0] / 100);
+        var tenor = new Period(data[1], data[2]);
+        helpers.push(new OISRateHelper(2, tenor, quoteHandle, eonia));
     });
 
     console.log(today.toISOString());
@@ -377,7 +420,7 @@ function eoniaCurveBootstrapping() {
     //     console.log(d.toISOString());
     // }
 
-    [today].forEach((d) => d.delete());
+    [today, calendar, dc, period, eonia, ...tenors].forEach((d) => d.delete());
 }
 
 var QuantLibLoader = QuantLib();
@@ -444,6 +487,22 @@ QuantLibLoader.onRuntimeInitialized = () => {
     // console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
     // console.log(m2.time - m0.time);
     // console.log(v);
+
+    // const { Date, Thirty360, Actual360, Actual365Fixed, ActualActual, Business252, mallinfo, Month } = QuantLib;
+    // var start = new Date(22, Month.January, 2017);
+    // var end = new Date(22, Month.August, 2019);
+    // var expects = [930, 942, 942, 942, 645];
+    // for (let index = 0; index < 3; index++) {
+    //     [Thirty360, Actual360, Actual365Fixed, ActualActual, Business252].forEach((type, i) => {
+    //         var m0 = mallinfo();
+    //         var dc = new type();
+    //         var d = dc.dayCount(start, end);
+    //         dc.delete();
+    //         var m1 = mallinfo();
+    //         console.log(`${type.name}: ${bytesDiff(m0, m1)} bytes`);
+    //     });
+    // }
+    // [start, end].forEach((d) => d.delete());
 
     eoniaCurveBootstrapping();
 };
