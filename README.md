@@ -106,6 +106,84 @@ var m1 = mallinfo();
 console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd)); // Should print 0
 ```
 
+## Using the wasm in a web page
+
+When using the wasm client side, two files `quantlib.js` and `quantlib.wasm` need to be added to the web server. In the web page, e.g. index.html add the following lines of code.
+
+```html
+<script type="text/javascript" src="quantlib.js"></script>
+<script>
+    const loader = window.QuantLib();
+    var QuantLib = null;
+    loader.onRuntimeInitialized = () => {
+        QuantLib = loader;
+        console.log(`QuantLib v${QuantLib.version} loaded`);
+    };
+</script>
+```
+
+## Using the wasm in a React app
+
+React in itself can easily use the Quantlib wasm. See the method above. When the app is build with `create-react-app`, webpack is used to load and build the source files. By default (version 3.1.1 or earlier of `react-scripts`), doesn't load wasm files. To bypass this problem Facebook's `react-scripts` can be forked and modified. How this is done is explained [here](https://auth0.com/blog/how-to-configure-create-react-app/).
+
+One fork that loads wasm files is [@captor/react-scripts](https://www.npmjs.com/package/@captor/react-scripts). To create a new app that with the modifies script run:
+
+```sh
+npx create-react-app <app-name> --scripts-version @captor/react-scripts
+```
+
+Or, in an already existing app, change the installed script reference.
+
+```sh
+npm uninstall react-scripts
+npm install @captor/react-scripts
+```
+
+Add `quantlib-wasm` to the app:
+
+```sh
+npm install quantlib-wasm
+```
+
+Using Quantlib in a source file, e.g. index.js or and other js file.
+
+```js
+import loader from "quantlib-wasm";
+import wasm from "quantlib-wasm/dist/quantlib.wasm";
+
+const QuantLib = loader({ locateFile: (path) => (path.endsWith(".wasm") ? wasm : path) });
+
+QuantLib.onRuntimeInitialized = () => {
+    console.log(QuantLib.version);
+};
+```
+
+The WebAssembly instantiation is asynchronous. To handle this in React, the instantiation can start in the constructor of the component and the `onRuntimeInitialized` should call `this.setState`. See React [State and Lifecycle](https://reactjs.org/docs/state-and-lifecycle.html).
+
+Example: Loading the wasm in an App component.
+
+```js
+import loader from "quantlib-wasm";
+import wasm from "quantlib-wasm/dist/quantlib.wasm";
+
+class App extends React.Component {
+    constructor(props) {
+        super(props);
+        const QuantLib = loader({ locateFile: (path) => (path.endsWith(".wasm") ? wasm : path) });
+        QuantLib.onRuntimeInitialized = () => {
+            this.setState({ status: "Done!", QuantLib });
+        };
+        this.state = { status: "Loading...", QuantLib };
+    }
+    render() {
+        const { status, QuantLib } = this.state;
+        return <h2>{status + (QuantLib.version ? ` Version ${QuantLib.version} loaded` : ``)}</h2>;
+    }
+}
+
+export default App;
+```
+
 ## Status
 
 Which objects and functions are exported? There is no documentation written yet. Until this project turns into alpha mode, the only reliable way is to check the code. In this case the binding file is the right place. It's found [here](https://github.com/CaptorAB/quantlib-wasm/blob/master/quantlib-embind.cpp).

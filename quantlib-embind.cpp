@@ -10,15 +10,6 @@
 #include <emscripten/bind.h>
 #include <boost/foreach.hpp>
 
-// using namespace QuantLib;
-// using namespace emscripten;
-// using namespace std;
-
-// using emscripten::class_;
-// using emscripten::enum_;
-// using emscripten::function;
-// using std::string;
-
 using namespace std;
 using namespace QuantLib;
 using namespace emscripten;
@@ -47,49 +38,45 @@ val emval_test_mallinfo()
     return rv;
 }
 
-enum DayCountConvention
-{
-    DayCountConventionThirty360,
-    DayCountConventionActual360,
-    DayCountConventionActual365,
-    DayCountConventionActualActual,
-    DayCountConventionBusiness252
-};
-
-const Calendar TARGETCalendar = TARGET();
-const Calendar nullCalendar = NullCalendar();
-const Calendar swedenCalendar = Sweden();
+// enum DayCountConvention
+// {
+//     DayCountConventionThirty360,
+//     DayCountConventionActual360,
+//     DayCountConventionActual365,
+//     DayCountConventionActualActual,
+//     DayCountConventionBusiness252
+// };
 
 void setValuationDate(Date &date)
 {
     Settings::instance().evaluationDate() = date;
 }
 
-DayCounter toDayCounter(DayCountConvention dc)
-{
-    if (dc == DayCountConventionThirty360)
-    {
-        return QuantLib::Thirty360();
-    }
-    if (dc == DayCountConventionActual360)
-    {
-        return QuantLib::Actual360();
-    }
-    if (dc == DayCountConventionActual365)
-    {
-        return QuantLib::Actual365Fixed();
-    }
-    if (dc == DayCountConventionActualActual)
-    {
-        return QuantLib::ActualActual();
-    }
-    if (dc == DayCountConventionBusiness252)
-    {
-        return QuantLib::Business252();
-    }
-    //default
-    return QuantLib::Actual360();
-}
+// DayCounter toDayCounter(DayCountConvention dc)
+// {
+//     if (dc == DayCountConventionThirty360)
+//     {
+//         return QuantLib::Thirty360();
+//     }
+//     if (dc == DayCountConventionActual360)
+//     {
+//         return QuantLib::Actual360();
+//     }
+//     if (dc == DayCountConventionActual365)
+//     {
+//         return QuantLib::Actual365Fixed();
+//     }
+//     if (dc == DayCountConventionActualActual)
+//     {
+//         return QuantLib::ActualActual();
+//     }
+//     if (dc == DayCountConventionBusiness252)
+//     {
+//         return QuantLib::Business252();
+//     }
+//     //default
+//     return QuantLib::Actual360();
+// }
 
 string timeUnitToString(Period &p)
 {
@@ -122,12 +109,10 @@ Date calendarAdvance(Calendar &cal, Date &d, Integer n, TimeUnit unit, BusinessD
     return cal.advance(d, n, unit, c, endOfMonth);
 }
 
-// std::shared_ptr<Date> fromISOString(string s)
 Date *dateFromISOString(string s)
 {
     int y, m, d;
     sscanf(s.c_str(), "%d-%d-%d", &y, &m, &d);
-    // return std::make_shared<Date>(d, (Month)m, y);
     return new Date(d, (Month)m, y);
 }
 
@@ -135,62 +120,6 @@ void swapSetPricingEngine(VanillaSwap &swap, Handle<YieldTermStructure> &discoun
 {
     boost::shared_ptr<PricingEngine> swapEngine(new DiscountingSwapEngine(discountingTermStructure));
     swap.setPricingEngine(swapEngine);
-}
-
-double swapNpvExample(double nominal, double fixedRate, double spread, int valuationDateAsSerialNumber, int maturityAsSerialNumber,
-                      int previousResetDateAsSerialNumber, double previousResetValue, int fixedScheduleCount, TimeUnit fixedScheduleTimeUnit,
-                      int floatScheduleCount, TimeUnit floatScheduleTimeUnit,
-                      DayCountConvention forwardCurveDayCountConvention, DayCountConvention oisCurveDayCountConvention,
-                      vector<int> &forwardCurveDatesAsSerialNumbers, vector<double> &forwardCurveDfs, vector<int> &oisCurveDatesAsSerialNumbers, vector<double> &oisCurveDfs)
-{
-    cout << forwardCurveDayCountConvention << endl;
-    Settings::instance().evaluationDate() = Date(valuationDateAsSerialNumber);
-
-    int i;
-    vector<Date> forwardCurveDates = vector<Date>(forwardCurveDatesAsSerialNumbers.size());
-    for (i = 0; i < forwardCurveDatesAsSerialNumbers.size(); i++)
-        forwardCurveDates[i] = Date(forwardCurveDatesAsSerialNumbers[i]);
-    vector<Date> oisCurveDates = vector<Date>(oisCurveDatesAsSerialNumbers.size());
-    for (i = 0; i < oisCurveDatesAsSerialNumbers.size(); i++)
-        oisCurveDates[i] = Date(oisCurveDatesAsSerialNumbers[i]);
-
-    // cout << "Fixed Period = " << (fixedScheduleCount * fixedScheduleTimeUnit) << endl;
-    // cout << "Float Period = " << (floatScheduleCount * floatScheduleTimeUnit) << endl;
-    // for (int i = 0; i < oisCurveDates.size(); i++)
-    // {
-    //     Date date(oisCurveDates[i]);
-    //     cout << date << endl;
-    // }
-
-    boost::shared_ptr<YieldTermStructure> forwardCurve(new InterpolatedDiscountCurve<LogLinear>(forwardCurveDates, forwardCurveDfs, toDayCounter(forwardCurveDayCountConvention)));
-    boost::shared_ptr<YieldTermStructure> oisCurve(new InterpolatedDiscountCurve<LogLinear>(oisCurveDates, oisCurveDfs, toDayCounter(oisCurveDayCountConvention)));
-
-    Handle<YieldTermStructure> forwardingTermStructure(forwardCurve);
-    Handle<YieldTermStructure> discountingTermStructure(oisCurve);
-
-    Date previousResetDate(previousResetDateAsSerialNumber);
-    Date maturity(maturityAsSerialNumber);
-
-    boost::shared_ptr<IborIndex> euribor(new Euribor(floatScheduleCount * floatScheduleTimeUnit, forwardingTermStructure));
-    euribor->addFixing(euribor->fixingDate(previousResetDate), previousResetValue, true);
-
-    VanillaSwap::Type swapType = VanillaSwap::Payer;
-    Schedule fixedSchedule(previousResetDate, maturity, fixedScheduleCount * fixedScheduleTimeUnit,
-                           TARGET(), ModifiedFollowing, ModifiedFollowing,
-                           DateGeneration::Forward, false);
-
-    Schedule floatSchedule(previousResetDate, maturity, floatScheduleCount * floatScheduleTimeUnit,
-                           TARGET(), ModifiedFollowing, ModifiedFollowing,
-                           DateGeneration::Forward, false);
-
-    VanillaSwap swap(VanillaSwap::Payer, nominal, fixedSchedule, fixedRate, QuantLib::Thirty360(),
-                     floatSchedule, euribor, spread, QuantLib::Actual360());
-
-    boost::shared_ptr<PricingEngine> swapEngine(new DiscountingSwapEngine(discountingTermStructure));
-    swap.setPricingEngine(swapEngine);
-    double res = swap.NPV();
-
-    return res;
 }
 
 double stdevDummy(vector<double> &xs)
@@ -231,80 +160,80 @@ VanillaSwap *createVanillaSwap(VanillaSwap::Type type, Real nominal, const Sched
     return res;
 }
 
-class MyClassA
+Handle<SimpleQuote> *createQuoteHandle(SimpleQuote &quote)
 {
-public:
-    MyClassA(int x, string y)
-        : x(x), y(y)
-    {
-    }
-
-    ~MyClassA()
-    {
-        // cout << "MyClassA destructor" << endl;
-    }
-
-    void incrementX()
-    {
-        ++x;
-    }
-
-    int getX() const { return x; }
-    void setX(int value) { x = value; }
-
-    static string getStringFromInstance(const MyClassA &instance)
-    {
-        return instance.y;
-    }
-
-private:
-    int x;
-    string y;
-};
-
-class MyClassB
-{
-public:
-    MyClassB(MyClassA &aref)
-    {
-        // cout << "x = " << aref.getX() << endl;
-        a = std::make_shared<MyClassA>(aref);
-        // cout << "x = " << a->getX() << endl;
-    }
-
-    ~MyClassB()
-    {
-        // cout << "MyClassB destructor" << endl;
-    }
-
-    int getX() const { return a->getX(); }
-    void setX(int value) { a->setX(value); }
-
-private:
-    std::shared_ptr<MyClassA> a;
-};
-
-EMSCRIPTEN_BINDINGS(dev)
-{
-    class_<MyClassA>("MyClassA")
-        .constructor<int, string>()
-        .function("incrementX", &MyClassA::incrementX)
-        .property("x", &MyClassA::getX, &MyClassA::setX)
-        .class_function("getStringFromInstance", &MyClassA::getStringFromInstance);
-    class_<MyClassB>("MyClassB")
-        .constructor<MyClassA &>()
-        .property("x", &MyClassB::getX, &MyClassB::setX);
+    boost::shared_ptr<SimpleQuote> ptr = boost::make_shared<SimpleQuote>(quote);
+    return new Handle<SimpleQuote>(ptr);
 }
+
+// class MyClassA
+// {
+// public:
+//     MyClassA(int x, string y)
+//         : x(x), y(y)
+//     {
+//     }
+
+//     ~MyClassA()
+//     {
+//         // cout << "MyClassA destructor" << endl;
+//     }
+
+//     void incrementX()
+//     {
+//         ++x;
+//     }
+
+//     int getX() const { return x; }
+//     void setX(int value) { x = value; }
+
+//     static string getStringFromInstance(const MyClassA &instance)
+//     {
+//         return instance.y;
+//     }
+
+// private:
+//     int x;
+//     string y;
+// };
+
+// class MyClassB
+// {
+// public:
+//     MyClassB(MyClassA &aref)
+//     {
+//         // cout << "x = " << aref.getX() << endl;
+//         a = std::make_shared<MyClassA>(aref);
+//         // cout << "x = " << a->getX() << endl;
+//     }
+
+//     ~MyClassB()
+//     {
+//         // cout << "MyClassB destructor" << endl;
+//     }
+
+//     int getX() const { return a->getX(); }
+//     void setX(int value) { a->setX(value); }
+
+// private:
+//     std::shared_ptr<MyClassA> a;
+// };
+
+// EMSCRIPTEN_BINDINGS(dev)
+// {
+//     class_<MyClassA>("MyClassA")
+//         .constructor<int, string>()
+//         .function("incrementX", &MyClassA::incrementX)
+//         .property("x", &MyClassA::getX, &MyClassA::setX)
+//         .class_function("getStringFromInstance", &MyClassA::getStringFromInstance);
+//     class_<MyClassB>("MyClassB")
+//         .constructor<MyClassA &>()
+//         .property("x", &MyClassB::getX, &MyClassB::setX);
+// }
 
 EMSCRIPTEN_BINDINGS(quantlib)
 {
     emscripten::constant<string>("version", QL_VERSION);
-    enum_<DayCountConvention>("DayCountConvention")
-        .value("Thirty360", DayCountConventionThirty360)
-        .value("Actual360", DayCountConventionActual360)
-        .value("Actual365", DayCountConventionActual365)
-        .value("ActualActual", DayCountConventionActualActual)
-        .value("Business252", DayCountConventionBusiness252);
     enum_<BusinessDayConvention>("BusinessDayConvention")
         .value("Following", Following)
         .value("ModifiedFollowing", ModifiedFollowing)
@@ -395,9 +324,6 @@ EMSCRIPTEN_BINDINGS(quantlib)
         .value("Thu", Thu)
         .value("Fri", Fri)
         .value("Sat", Sat);
-    emscripten::constant("TARGET", TARGETCalendar);
-    emscripten::constant("NullCalendar", nullCalendar);
-    emscripten::constant("Sweden", swedenCalendar);
     class_<Date>("Date")
         .constructor<>()
         .constructor<int>()
@@ -423,22 +349,27 @@ EMSCRIPTEN_BINDINGS(quantlib)
         .function("isBusinessDay", &Calendar::isBusinessDay)
         .function("adjust", &Calendar::adjust)
         .function("advance", &calendarAdvance);
+    class_<TARGET, base<Calendar>>("TARGET").constructor<>();
+    class_<NullCalendar, base<Calendar>>("NullCalendar").constructor<>();
+    class_<Sweden, base<Calendar>>("Sweden").constructor<>();
     class_<Period>("Period")
         .constructor<int, TimeUnit>()
         .function("toString", &timeUnitToString);
     class_<DayCounter>("DayCounter")
-        .function("name", &DayCounter::name);
+        .function("name", &DayCounter::name)
+        .function("dayCount", &DayCounter::dayCount)
+        .function("yearFraction", &DayCounter::yearFraction);
     class_<Thirty360, base<DayCounter>>("Thirty360")
         .constructor<>()
-        .constructor<Thirty360::Convention>()
         .constructor<Thirty360::Convention, bool>();
     class_<Actual360, base<DayCounter>>("Actual360")
         .constructor<>()
         .constructor<bool>();
+    class_<Actual365Fixed, base<DayCounter>>("Actual365Fixed").constructor<>();
     class_<ActualActual, base<DayCounter>>("ActualActual")
         .constructor<>()
-        .constructor<ActualActual::Convention>()
         .constructor<ActualActual::Convention, Schedule>();
+    class_<Business252, base<DayCounter>>("Business252").constructor<>();
     class_<Index>("Index")
         .function("addFixing", &Index::addFixing);
     class_<InterestRateIndex, base<Index>>("InterestRateIndex")
@@ -454,7 +385,6 @@ EMSCRIPTEN_BINDINGS(quantlib)
         .function("setPricingEngine", &swapSetPricingEngine)
         .function("NPV", &swapNpv);
     class_<Handle<YieldTermStructure>>("Handle<YieldTermStructure>");
-    emscripten::function("swapNpvExample", &swapNpv);
     emscripten::function("stdev", &stdev);
     emscripten::function("stdevDummy", &stdevDummy);
     emscripten::function("createVanillaSwap", &createVanillaSwap, allow_raw_pointers());
@@ -467,6 +397,12 @@ EMSCRIPTEN_BINDINGS(quantlib)
         .constructor<int>();
     register_vector<Date>("Vector<Date>")
         .constructor<int>();
+    class_<DepositRateHelper>("DepositRateHelper")
+        .constructor<Handle<Quote>, Period, Natural, Calendar, BusinessDayConvention, bool, DayCounter>();
+    class_<SimpleQuote>("SimpleQuote")
+        .constructor<Real>();
+    class_<Handle<SimpleQuote>>("QuoteHandle")
+        .constructor(&createQuoteHandle, allow_raw_pointers());
 }
 
 } // namespace

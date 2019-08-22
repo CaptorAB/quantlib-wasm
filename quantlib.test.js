@@ -19,7 +19,9 @@ describe("captor/quantlib", () => {
     });
 
     test("Sweden Calendar", async () => {
-        expect(QuantLib.Sweden.name()).toBe("Sweden");
+        var calendar = new QuantLib.Sweden();
+        expect(calendar.name()).toBe("Sweden");
+        calendar.delete();
     });
 
     test("Calendar weekday", async () => {
@@ -30,24 +32,14 @@ describe("captor/quantlib", () => {
     });
 
     test("Calendar adjust and advance", async () => {
-        const { Date, BusinessDayConvention, TimeUnit } = QuantLib;
-        // var ms = [];
-        // ms.push(QuantLib.mallinfo());
+        const { Date, BusinessDayConvention, TimeUnit, TARGET } = QuantLib;
         var settlementDate = Date.fromISOString("2008-09-18");
-        var calendar = QuantLib.TARGET;
+        var calendar = new TARGET();
         var settlementDateAdj = calendar.adjust(settlementDate, BusinessDayConvention.Following);
         var fixingDays = 3;
         var todaysDate = calendar.advance(settlementDateAdj, -fixingDays, TimeUnit.Days, BusinessDayConvention.Following, true);
         expect(todaysDate.toISOString()).toBe("2008-09-15");
-        // ms.push(QuantLib.mallinfo());
-        [settlementDate, settlementDateAdj, todaysDate].forEach((d) => d.delete());
-        // ms.push(QuantLib.mallinfo());
-        // console.log(
-        //     ms
-        //         .filter((d, i) => i !== 0)
-        //         .map((d) => bytesDiff(ms[0], d))
-        //         .join(", ")
-        // );
+        [settlementDate, settlementDateAdj, todaysDate, calendar].forEach((d) => d.delete());
     });
 
     test("Date", async () => {
@@ -60,6 +52,24 @@ describe("captor/quantlib", () => {
         expect(myDate.month().value).toBe(8);
         expect(myDate.year()).toBe(2009);
         expect(myDate.serialNumber()).toBe(40037);
+    });
+
+    test("DayCounters", async () => {
+        const { Date, Month, Thirty360, Actual360, Actual365Fixed, ActualActual, Business252 } = QuantLib;
+        var m0 = QuantLib.mallinfo();
+        var start = new Date(22, Month.January, 2017);
+        var end = new Date(22, Month.August, 2019);
+
+        var expects = [930, 942, 942, 942, 645];
+        [Thirty360, Actual360, Actual365Fixed, ActualActual, Business252 /**/].forEach((type, i) => {
+            var dc = new type();
+            var d = dc.dayCount(start, end);
+            expect(d).toBe(expects[i]);
+            dc.delete();
+        });
+        [start, end].forEach((d) => d.delete());
+        var m1 = QuantLib.mallinfo();
+        console.log(bytesDiff(m0, m1));
     });
 
     test("Vector", async () => {

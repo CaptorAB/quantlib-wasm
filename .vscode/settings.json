@@ -89,6 +89,7 @@
         "__tree": "cpp",
         "__tuple": "cpp",
         "bit": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "__functional_base_03": "cpp"
     }
 }

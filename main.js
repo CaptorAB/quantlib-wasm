@@ -3,7 +3,7 @@ var QuantLib = require(".");
 const dateToSerialNumber = (d) => d.getTime() / 86400000 + 25569;
 const serialNumberToDate = (n) => new Date((n - 25569) * 86400000);
 const addDays = (d, n) => new Date(d.getTime() + 86400000 * n);
-const bytesDiff = (m1, m0) => m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd);
+const bytesDiff = (m0, m1) => m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd);
 
 const toWasmVector = (arr, type) => {
     let res = new type(arr.length);
@@ -303,110 +303,147 @@ function generateSchedule() {
     schedule2.delete();
 }
 
-function testSchedule() {
-    const { Date, Period, TimeUnit, BusinessDayConvention, DateGenerationRule, Schedule } = QuantLib;
+function eoniaCurveBootstrapping() {
+    const { Date, Period, TimeUnit, BusinessDayConvention, DateGenerationRule, Schedule, Month, setValuationDate, SimpleQuote } = QuantLib;
+    const { TARGET, QuoteHandle, DepositRateHelper, Thirty360 } = QuantLib;
+    const { Actual360, Actual365Fixed, ActualActual, Business252 } = QuantLib;
+    const { Years, Months, Days } = TimeUnit;
+    const { Following } = BusinessDayConvention;
 
-    var previousResetDate = Date.fromISOString("2012-11-20");
-    var maturity = Date.fromISOString("2022-11-20");
-    var fixedTenor = new Period(1, TimeUnit.Years);
-    var calendar = QuantLib.TARGET;
-    var convention = BusinessDayConvention.ModifiedFollowing;
-    var terminationDateConvention = BusinessDayConvention.ModifiedFollowing;
-    var rule = DateGenerationRule.Forward;
-    var endOfMonth = false;
-    var firstDate = new Date();
-    var nextToLastDate = new Date();
+    var today = new Date(11, Month.December, 2002);
+    var end = new Date(11, Month.December, 2004);
 
-    var fixedSchedule = new Schedule(
-        previousResetDate,
-        maturity,
-        fixedTenor,
-        calendar,
-        convention,
-        terminationDateConvention,
-        rule,
-        endOfMonth,
-        firstDate,
-        nextToLastDate
-    );
-    var dates = fixedSchedule.dates();
-    for (let i = 0; i < dates.size(); i++) {
-        let d = dates.get(i);
-        console.log(d.toISOString());
-    }
-    [previousResetDate, maturity, fixedTenor, firstDate, nextToLastDate].forEach((d) => d.delete());
+    var m0 = QuantLib.mallinfo();
+    var start = new Date(22, Month.January, 2017);
+    var end = new Date(22, Month.August, 2019);
+    console.log(bytesDiff(m0, QuantLib.mallinfo()));
+
+    var expects = [930, 942, 942, 942, 645];
+    [Thirty360, Actual360, Actual365Fixed, ActualActual /*, Business252 */].forEach((type, i) => {
+        var dc = new type();
+        var d = dc.dayCount(start, end);
+        console.log(d);
+        dc.delete();
+    });
+    [start, end].forEach((d) => d.delete());
+    var m1 = QuantLib.mallinfo();
+    console.log(bytesDiff(m0, m1));
+
+    setValuationDate(today);
+    var dc = new Thirty360();
+    console.log(dc.dayCount(start, end));
+
+    var calendar = new TARGET();
+
+    var rates = [0.04, 0.04, 0.04];
+    var fixingDays = [0, 1, 2];
+    var period = new Period(1, Days);
+
+    var helpers = rates.map((rate, i) => {
+        var fixingDay = fixingDays[i];
+        var quote = new SimpleQuote(rate);
+        var quoteHandle = new QuoteHandle(quote);
+        return new DepositRateHelper(quoteHandle, period, fixingDay, calendar, Following, false);
+    });
+
+    console.log(today.toISOString());
+
+    // var previousResetDate = Date.fromISOString("2012-11-20");
+    // var maturity = Date.fromISOString("2022-11-20");
+    // var fixedTenor = new Period(1, TimeUnit.Years);
+    // var calendar = QuantLib.TARGET;
+    // var convention = BusinessDayConvention.ModifiedFollowing;
+    // var terminationDateConvention = BusinessDayConvention.ModifiedFollowing;
+    // var rule = DateGenerationRule.Forward;
+    // var endOfMonth = false;
+    // var firstDate = new Date();
+    // var nextToLastDate = new Date();
+
+    // var fixedSchedule = new Schedule(
+    //     previousResetDate,
+    //     maturity,
+    //     fixedTenor,
+    //     calendar,
+    //     convention,
+    //     terminationDateConvention,
+    //     rule,
+    //     endOfMonth,
+    //     firstDate,
+    //     nextToLastDate
+    // );
+    // var dates = fixedSchedule.dates();
+    // for (let i = 0; i < dates.size(); i++) {
+    //     let d = dates.get(i);
+    //     console.log(d.toISOString());
+    // }
+
+    [today].forEach((d) => d.delete());
 }
 
-// var QuantLibLoader = QuantLib();
-// QuantLibLoader.onRuntimeInitialized = () => {
-//     QuantLib = QuantLibLoader;
+var QuantLibLoader = QuantLib();
+QuantLibLoader.onRuntimeInitialized = () => {
+    QuantLib = QuantLibLoader;
 
-//     // testVector();
-//     // var d = new QuantLib.Date(34000);
-//     // console.log(d.toISOString());
-//     // generateSchedule();
-//     // BusinessDayConvention terminationDateConvention, DateGeneration::Rule rule, bool endOfMonth,
-//     // int firstDateAsSerialNumber = 0, int nextToLastDateAsSerialNumber = 0
-//     // var arr = [...Array(100000)].map((d, i) => i + 1);
-//     // for (let index = 0; index < 1000; index++) {
-//     // 	let a = toWasmDoubleVector(arr);
-//     // 	let v = QuantLib.stdev(a);
-//     // 	a.delete();
-//     // }
-//     // var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
+    // testVector();
+    // var d = new QuantLib.Date(34000);
+    // console.log(d.toISOString());
+    // generateSchedule();
+    // BusinessDayConvention terminationDateConvention, DateGeneration::Rule rule, bool endOfMonth,
+    // int firstDateAsSerialNumber = 0, int nextToLastDateAsSerialNumber = 0
+    // var arr = [...Array(100000)].map((d, i) => i + 1);
+    // for (let index = 0; index < 1000; index++) {
+    // 	let a = toWasmDoubleVector(arr);
+    // 	let v = QuantLib.stdev(a);
+    // 	a.delete();
+    // }
+    // var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
 
-//     // Works fine
-//     // const { MyClassA, MyClassB } = QuantLib;
-//     // var m0, m1, m2;
-//     // for (let i = 0; i < 1000000; i++) {
-//     //     m0 = QuantLib.mallinfo();
-//     //     let a = new MyClassA(10, "hello");
-//     //     a.incrementX();
-//     //     let x = a.x; // 11
-//     //     a.x = 758; // 20
-//     //     let s = MyClassA.getStringFromInstance(a); // "hello"
-//     //     let b = new MyClassB(a);
-//     //     // console.log(b.x);
-//     //     b.x = 3;
-//     //     // console.log(b.x);
-//     //     if (i === 0) {
-//     //         m1 = QuantLib.mallinfo();
-//     //     }
-//     //     a.delete();
-//     //     b.delete();
-//     //     if (i === 0) {
-//     //         m2 = QuantLib.mallinfo();
-//     //         console.log(JSON.stringify(m0));
-//     //         console.log(JSON.stringify(m1));
-//     //         console.log(JSON.stringify(m2));
-//     //         console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd));
-//     //         console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
-//     //     }
-//     // }
+    // Works fine
+    // const { MyClassA, MyClassB } = QuantLib;
+    // var m0, m1, m2;
+    // for (let i = 0; i < 1000000; i++) {
+    //     m0 = QuantLib.mallinfo();
+    //     let a = new MyClassA(10, "hello");
+    //     a.incrementX();
+    //     let x = a.x; // 11
+    //     a.x = 758; // 20
+    //     let s = MyClassA.getStringFromInstance(a); // "hello"
+    //     let b = new MyClassB(a);
+    //     // console.log(b.x);
+    //     b.x = 3;
+    //     // console.log(b.x);
+    //     if (i === 0) {
+    //         m1 = QuantLib.mallinfo();
+    //     }
+    //     a.delete();
+    //     b.delete();
+    //     if (i === 0) {
+    //         m2 = QuantLib.mallinfo();
+    //         console.log(JSON.stringify(m0));
+    //         console.log(JSON.stringify(m1));
+    //         console.log(JSON.stringify(m2));
+    //         console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd));
+    //         console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
+    //     }
+    // }
 
-//     // var v;
-//     // var m0 = QuantLib.mallinfo();
-//     // var n = 225;
-//     // var m1;
-//     // for (let i = 0; i < n; i++) {
-//     //     v = replicateSwapExample2();
-//     //     if (i === n - 2) {
-//     //         m1 = QuantLib.mallinfo();
-//     //     }
-//     // }
-//     // var m2 = QuantLib.mallinfo();
-//     // console.log(JSON.stringify(m0));
-//     // console.log(JSON.stringify(m1));
-//     // console.log(JSON.stringify(m2));
-//     // console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
-//     // console.log(m2.time - m0.time);
-//     // console.log(v);
+    // var v;
+    // var m0 = QuantLib.mallinfo();
+    // var n = 225;
+    // var m1;
+    // for (let i = 0; i < n; i++) {
+    //     v = replicateSwapExample2();
+    //     if (i === n - 2) {
+    //         m1 = QuantLib.mallinfo();
+    //     }
+    // }
+    // var m2 = QuantLib.mallinfo();
+    // console.log(JSON.stringify(m0));
+    // console.log(JSON.stringify(m1));
+    // console.log(JSON.stringify(m2));
+    // console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
+    // console.log(m2.time - m0.time);
+    // console.log(v);
 
-//     // testSchedule();
-// };
-
-var loader = QuantLib();
-loader.onRuntimeInitialized = () => {
-    QuantLib = loader;
-    console.log(`QuantLib v${QuantLib.version} loaded`);
+    eoniaCurveBootstrapping();
 };
