@@ -31,6 +31,23 @@ describe("captor/quantlib", () => {
         settlementDate.delete();
     });
 
+    test("UK Calendar", async () => {
+        // Market Holidays
+        // Holiday	Markets Closed
+        // 05/27/2019	Monday	London Stock ExchangeUnited Kingdom
+        // 08/26/2019	Monday	London Stock ExchangeUnited Kingdom
+        // 12/25/2019	Wednesday	London Stock ExchangeUnited Kingdom
+        // 12/26/2019	Thursday	London Stock ExchangeUnited Kingdom
+        const { Date, Weekday, UnitedKingdom, Month, UnitedKingdomMarket } = QuantLib;
+        const { May, August, December } = Month;
+        var dates = [new Date(27, May, 2019), new Date(26, August, 2019), new Date(25, December, 2019), new Date(26, December, 2019)];
+        var cal = new UnitedKingdom(UnitedKingdomMarket.Exchange);
+        dates.forEach((d) => {
+            expect(cal.isBusinessDay(d)).toBe(false);
+        });
+        [cal, ...dates].forEach((d) => d.delete());
+    });
+
     test("Calendar adjust and advance", async () => {
         const { Date, BusinessDayConvention, TimeUnit, TARGET } = QuantLib;
         var settlementDate = Date.fromISOString("2008-09-18");

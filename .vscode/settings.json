@@ -91,6 +91,7 @@
         "bit": "cpp",
         "string_view": "cpp",
         "__functional_base_03": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "__functional_03": "cpp"
     }
 }

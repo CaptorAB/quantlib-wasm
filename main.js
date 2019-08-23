@@ -423,6 +423,99 @@ function eoniaCurveBootstrapping() {
     [today, calendar, dc, period, eonia, ...tenors].forEach((d) => d.delete());
 }
 
+function billiontraderBootstrapping() {
+    const { Date, UnitedKingdom, UnitedStates, JointCalendar, UnitedKingdomMarket, UnitedStatesMarket, JointCalendarRule } = QuantLib;
+    const { TimeUnit, BusinessDayConvention, Month, setValuationDate, Actual360, QuoteHandle, Period, DepositRateHelper } = QuantLib;
+    const { IMM, FuturesRateHelper, SwapRateHelper, Frequency, USDLibor, Compounding } = QuantLib;
+    const { February } = Month;
+    const { Days, Weeks, Months, Years } = TimeUnit;
+
+    var cal1 = new UnitedKingdom(UnitedKingdomMarket.Exchange);
+    var cal2 = new UnitedStates(UnitedStatesMarket.Settlement);
+    var calendar = new JointCalendar(cal1, cal2, JointCalendarRule.JoinHolidays);
+
+    var d0 = new Date(18, February, 2015);
+    var settlementDate = calendar.adjust(d0, BusinessDayConvention.Following);
+    var fixingDays = 2;
+    var todaysDate = calendar.advance(settlementDate, -fixingDays, TimeUnit.Days, BusinessDayConvention.Following, false);
+    setValuationDate(todaysDate);
+    var depositDayCounter = new Actual360();
+    var depositsBusinessDayConvention = BusinessDayConvention.ModifiedFollowing;
+
+    var trashcan = [cal1, cal2, calendar, d0, settlementDate, depositDayCounter];
+
+    var deposits = [
+        { rate: 0.001375, periods: 7, unit: Days },
+        { rate: 0.001717, periods: 4, unit: Weeks },
+        { rate: 0.002112, periods: 2, unit: Months },
+        { rate: 0.002581, periods: 3, unit: Months }
+    ];
+    var depoFutSwapInstruments = [];
+    deposits.forEach((d) => {
+        var quote = new QuoteHandle(d.rate);
+        var period = new Period(d.periods, d.unit);
+        depoFutSwapInstruments.push(
+            new DepositRateHelper(quote, period, fixingDays, calendar, depositsBusinessDayConvention, true, depositDayCounter)
+        );
+        trashcan.push(quote);
+        trashcan.push(period);
+    });
+
+    var futDayCounter = new Actual360();
+    var futMonths = 3;
+    var futures = [{ rate: 99.725 }, { rate: 99.585 }, { rate: 99.385 }, { rate: 99.16 }, { rate: 98.93 }, { rate: 98.715 }];
+    var imm = IMM.nextDate(settlementDate, true);
+    console.log(imm.toISOString());
+    futures.forEach((d) => {
+        var quote = new QuoteHandle(d.rate);
+        depoFutSwapInstruments.push(
+            new FuturesRateHelper(quote, imm, futMonths, calendar, BusinessDayConvention.ModifiedFollowing, true, depositDayCounter)
+        );
+        trashcan.push(imm);
+        imm = IMM.nextDate(settlementDate, true);
+        trashcan.push(quote);
+    });
+
+    var swFixedLegFrequency = Frequency.Annual;
+    var swFixedLegConvention = BusinessDayConvention.Unadjusted;
+    var swFixedLegDayCounter = new Actual360();
+    var swFloatingLegIndexPeriod = new Period(3, Months);
+    var swFloatingLegIndex = new USDLibor(swFloatingLegIndexPeriod);
+    trashcan.push(swFloatingLegIndexPeriod);
+
+    var swaps = [
+        { rate: 0.0089268, periods: 1, unit: Years },
+        { rate: 0.0123343, periods: 2, unit: Years },
+        { rate: 0.0147985, periods: 3, unit: Years },
+        { rate: 0.0165843, periods: 4, unit: Years },
+        { rate: 0.0179191, periods: 5, unit: Years }
+    ];
+    swaps.forEach((d) => {
+        var quote = new QuoteHandle(d.rate);
+        var period = new Period(d.periods, d.unit);
+        depoFutSwapInstruments.push(
+            new SwapRateHelper(quote, period, calendar, swFixedLegFrequency, swFixedLegConvention, swFixedLegDayCounter, swFloatingLegIndex)
+        );
+        trashcan.push(quote);
+        trashcan.push(period);
+    });
+
+    var termStructureDayCounter = new Actual360();
+    var instrs = toWasmVector(depoFutSwapInstruments, QuantLib.Vector$RateHelper$);
+    var depoFutSwapTermStructure = new QuantLib.PiecewiseYieldCurve$Discount$Linear$(
+        settlementDate,
+        instrs,
+        termStructureDayCounter,
+        1.0e-15
+    );
+
+    var matDate1 = new Date(25, February, 2015);
+    var interestRate = depoFutSwapTermStructure.zeroRate(matDate1, depositDayCounter, Compounding.Simple, Frequency.Annual, true);
+    console.log(interestRate.rate());
+
+    trashcan.forEach((d) => d.delete());
+}
+
 var QuantLibLoader = QuantLib();
 QuantLibLoader.onRuntimeInitialized = () => {
     QuantLib = QuantLibLoader;
@@ -441,68 +534,5 @@ QuantLibLoader.onRuntimeInitialized = () => {
     // }
     // var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
 
-    // Works fine
-    // const { MyClassA, MyClassB } = QuantLib;
-    // var m0, m1, m2;
-    // for (let i = 0; i < 1000000; i++) {
-    //     m0 = QuantLib.mallinfo();
-    //     let a = new MyClassA(10, "hello");
-    //     a.incrementX();
-    //     let x = a.x; // 11
-    //     a.x = 758; // 20
-    //     let s = MyClassA.getStringFromInstance(a); // "hello"
-    //     let b = new MyClassB(a);
-    //     // console.log(b.x);
-    //     b.x = 3;
-    //     // console.log(b.x);
-    //     if (i === 0) {
-    //         m1 = QuantLib.mallinfo();
-    //     }
-    //     a.delete();
-    //     b.delete();
-    //     if (i === 0) {
-    //         m2 = QuantLib.mallinfo();
-    //         console.log(JSON.stringify(m0));
-    //         console.log(JSON.stringify(m1));
-    //         console.log(JSON.stringify(m2));
-    //         console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd));
-    //         console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
-    //     }
-    // }
-
-    // var v;
-    // var m0 = QuantLib.mallinfo();
-    // var n = 225;
-    // var m1;
-    // for (let i = 0; i < n; i++) {
-    //     v = replicateSwapExample2();
-    //     if (i === n - 2) {
-    //         m1 = QuantLib.mallinfo();
-    //     }
-    // }
-    // var m2 = QuantLib.mallinfo();
-    // console.log(JSON.stringify(m0));
-    // console.log(JSON.stringify(m1));
-    // console.log(JSON.stringify(m2));
-    // console.log(m2.uordblks - m0.uordblks + (m2.hblkhd - m0.hblkhd));
-    // console.log(m2.time - m0.time);
-    // console.log(v);
-
-    // const { Date, Thirty360, Actual360, Actual365Fixed, ActualActual, Business252, mallinfo, Month } = QuantLib;
-    // var start = new Date(22, Month.January, 2017);
-    // var end = new Date(22, Month.August, 2019);
-    // var expects = [930, 942, 942, 942, 645];
-    // for (let index = 0; index < 3; index++) {
-    //     [Thirty360, Actual360, Actual365Fixed, ActualActual, Business252].forEach((type, i) => {
-    //         var m0 = mallinfo();
-    //         var dc = new type();
-    //         var d = dc.dayCount(start, end);
-    //         dc.delete();
-    //         var m1 = mallinfo();
-    //         console.log(`${type.name}: ${bytesDiff(m0, m1)} bytes`);
-    //     });
-    // }
-    // [start, end].forEach((d) => d.delete());
-
-    eoniaCurveBootstrapping();
+    billiontraderBootstrapping();
 };

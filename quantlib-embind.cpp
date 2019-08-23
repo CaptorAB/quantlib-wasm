@@ -129,82 +129,42 @@ DatedOISRateHelper *createDatedOISRateHelper(Date &startDate, Date &endDate, Han
     return new DatedOISRateHelper(startDate, endDate, fixedRate, ptrOvernightIndex);
 }
 
-FuturesRateHelper *createFuturesRateHelper(Real price, Date &iborStartDate, Natural lengthInMonths, Calendar &calendar, BusinessDayConvention convention, bool endOfMonth, DayCounter &dayCounter)
+FuturesRateHelper *createFuturesRateHelper(Handle<Quote> &price, Date &iborStartDate, Natural lengthInMonths, Calendar &calendar, BusinessDayConvention convention, bool endOfMonth, DayCounter &dayCounter)
 {
     return new FuturesRateHelper(price, iborStartDate, lengthInMonths, calendar, convention, endOfMonth, dayCounter);
 }
 
-SwapRateHelper *createSwapRateHelper(Handle<Quote> &rate, SwapIndex &swapIndex, Handle<Quote> &spread,
-                                     Period &fwdStart, Handle<YieldTermStructure> &discountingCurve, Pillar::Choice pillar, Date customPillarDate)
+SwapRateHelper *createSwapRateHelper(Handle<Quote> &rate, Period &tenor, Calendar &calendar, Frequency fixedFrequency,
+                                     BusinessDayConvention fixedConvention, DayCounter &fixedDayCount, IborIndex &iborIndex)
 {
-    ext::shared_ptr<SwapIndex> ptrSwapIndex(&swapIndex);
-    return new SwapRateHelper(rate, ptrSwapIndex, spread, fwdStart, discountingCurve, pillar, customPillarDate);
+    boost::shared_ptr<IborIndex> ptrIborIndex = boost::make_shared<IborIndex>(iborIndex);
+    // ext::shared_ptr<IborIndex> ptrIborIndex(&iborIndex);
+    return new SwapRateHelper(rate, tenor, calendar, fixedFrequency, fixedConvention, fixedDayCount, ptrIborIndex);
 }
 
-// class MyClassA
-// {
-// public:
-//     MyClassA(int x, string y)
-//         : x(x), y(y)
-//     {
-//     }
+Date *immNextDate(const Date &date, bool mainCycle)
+{
+    return new Date(IMM::nextDate(date, mainCycle).serialNumber());
+}
 
-//     ~MyClassA()
-//     {
-//         // cout << "MyClassA destructor" << endl;
-//     }
+PiecewiseYieldCurve<Discount, Linear> *createPiecewiseYieldCurveDiscountLinear(Date &referenceDate, vector<RateHelper *> &instruments, DayCounter &dayCounter, Real accuracy)
+{
+    vector<boost::shared_ptr<RateHelper>> ptrs;
+    for (int i = 0; i < instruments.size(); i++)
+    {
+        // boost::shared_ptr<RateHelper> ptr = boost::make_shared<RateHelper>(instruments[i]);
+        // ext::shared_ptr<RateHelper> ptr(&instruments[i]);
+        boost::shared_ptr<RateHelper> ptr(instruments[i]);
+        ptrs.push_back(ptr);
+    }
+    return new PiecewiseYieldCurve<Discount, Linear>(referenceDate, ptrs, dayCounter, accuracy);
+}
 
-//     void incrementX()
-//     {
-//         ++x;
-//     }
-
-//     int getX() const { return x; }
-//     void setX(int value) { x = value; }
-
-//     static string getStringFromInstance(const MyClassA &instance)
-//     {
-//         return instance.y;
-//     }
-
-// private:
-//     int x;
-//     string y;
-// };
-
-// class MyClassB
-// {
-// public:
-//     MyClassB(MyClassA &aref)
-//     {
-//         // cout << "x = " << aref.getX() << endl;
-//         a = std::make_shared<MyClassA>(aref);
-//         // cout << "x = " << a->getX() << endl;
-//     }
-
-//     ~MyClassB()
-//     {
-//         // cout << "MyClassB destructor" << endl;
-//     }
-
-//     int getX() const { return a->getX(); }
-//     void setX(int value) { a->setX(value); }
-
-// private:
-//     std::shared_ptr<MyClassA> a;
-// };
-
-// EMSCRIPTEN_BINDINGS(dev)
-// {
-//     class_<MyClassA>("MyClassA")
-//         .constructor<int, string>()
-//         .function("incrementX", &MyClassA::incrementX)
-//         .property("x", &MyClassA::getX, &MyClassA::setX)
-//         .class_function("getStringFromInstance", &MyClassA::getStringFromInstance);
-//     class_<MyClassB>("MyClassB")
-//         .constructor<MyClassA &>()
-//         .property("x", &MyClassB::getX, &MyClassB::setX);
-// }
+InterestRate *yieldTermStructureZeroRate(YieldTermStructure &yieldTermStructure, Date &d, DayCounter &resultDayCounter, Compounding comp, Frequency freq, bool extrapolate)
+{
+    auto r = yieldTermStructure.zeroRate(d, resultDayCounter, comp, freq, extrapolate);
+    return new InterestRate(r.rate(), r.dayCounter(), r.compounding(), r.frequency());
+}
 
 EMSCRIPTEN_BINDINGS(quantlib)
 {
@@ -317,6 +277,36 @@ EMSCRIPTEN_BINDINGS(quantlib)
     enum_<JointCalendarRule>("JointCalendarRule")
         .value("JoinHolidays", JointCalendarRule::JoinHolidays)
         .value("JoinBusinessDays", JointCalendarRule::JoinBusinessDays);
+    enum_<Frequency>("Frequency")
+        .value("NoFrequency", NoFrequency)
+        .value("Once", Once)
+        .value("Annual", Annual)
+        .value("Semiannual", Semiannual)
+        .value("EveryFourthMonth", EveryFourthMonth)
+        .value("Quarterly", Quarterly)
+        .value("Bimonthly", Bimonthly)
+        .value("Monthly", Monthly)
+        .value("EveryFourthWeek", EveryFourthWeek)
+        .value("Biweekly", Biweekly)
+        .value("Weekly", Weekly)
+        .value("Daily", Daily)
+        .value("OtherFrequency", OtherFrequency);
+    enum_<Compounding>("Compounding")
+        .value("Simple", Simple)
+        .value("Compounded", Compounded)
+        .value("Continuous", Continuous)
+        .value("SimpleThenCompounded", SimpleThenCompounded)
+        .value("CompoundedThenSimple", CompoundedThenSimple);
+
+    register_vector<int>("Vector<int>")
+        .constructor<int>();
+    register_vector<double>("Vector<double>")
+        .constructor<int>();
+    register_vector<Date>("Vector<Date>")
+        .constructor<int>();
+    register_vector<RateHelper *>("Vector<RateHelper>")
+        .constructor<int>();
+
     class_<Date>("Date")
         .constructor<>()
         .constructor<int>()
@@ -336,20 +326,31 @@ EMSCRIPTEN_BINDINGS(quantlib)
         .constructor<Date, Date, Period, Calendar, BusinessDayConvention, BusinessDayConvention, DateGeneration::Rule, bool, Date, Date>()
         .function("size", &Schedule::size)
         .function("dates", &Schedule::dates);
+
+    /* Calendars */
     class_<Calendar>("Calendar")
         .function("name", &Calendar::name)
         .function("toString", &calendarToString)
         .function("isBusinessDay", &Calendar::isBusinessDay)
         .function("adjust", &Calendar::adjust)
+        // .function<Calendar, Date, Integer, TimeUnit>("advance", &Calendar::advance)
         .function("advance", &calendarAdvance);
+    class_<JointCalendar, base<Calendar>>("JointCalendar")
+        .constructor<Calendar, Calendar, JointCalendarRule>()
+        .constructor<Calendar, Calendar, Calendar, JointCalendarRule>()
+        .constructor<Calendar, Calendar, Calendar, Calendar, JointCalendarRule>();
     class_<TARGET, base<Calendar>>("TARGET").constructor<>();
     class_<NullCalendar, base<Calendar>>("NullCalendar").constructor<>();
     class_<UnitedKingdom, base<Calendar>>("UnitedKingdom").constructor<UnitedKingdom::Market>();
     class_<UnitedStates, base<Calendar>>("UnitedStates").constructor().constructor<UnitedStates::Market>();
     class_<Sweden, base<Calendar>>("Sweden").constructor<>();
+
+    /* Period */
     class_<Period>("Period")
         .constructor<int, TimeUnit>()
         .function("toString", &timeUnitToString);
+
+    /* DayCounters */
     class_<DayCounter>("DayCounter")
         .function("name", &DayCounter::name)
         .function("dayCount", &DayCounter::dayCount)
@@ -366,6 +367,8 @@ EMSCRIPTEN_BINDINGS(quantlib)
         .constructor<ActualActual::Convention, Schedule>();
     class_<Business252, base<DayCounter>>("Business252").constructor<>();
     class_<boost::optional<BusinessDayConvention>>("OptionalBusinessDayConvention");
+
+    /* Misc */
     class_<VanillaSwap>("VanillaSwap")
         .constructor(&createVanillaSwap, allow_raw_pointers())
         // .constructor<VanillaSwap::Type, Rate, Schedule, Rate, DayCounter, Schedule, ext::shared_ptr<IborIndex>, Spread, DayCounter, boost::optional<BusinessDayConvention>>()
@@ -377,20 +380,18 @@ EMSCRIPTEN_BINDINGS(quantlib)
     emscripten::function("mallinfo", &emval_test_mallinfo);
     emscripten::function("setValuationDate", &setValuationDate);
     emscripten::function("createLogLinearYieldTermStructure", &createLogLinearYieldTermStructure, allow_raw_pointers());
-    register_vector<int>("Vector<int>")
-        .constructor<int>();
-    register_vector<double>("Vector<double>")
-        .constructor<int>();
-    register_vector<Date>("Vector<Date>")
-        .constructor<int>();
-    class_<DepositRateHelper>("DepositRateHelper")
-        .constructor<Handle<Quote>, Period, Natural, Calendar, BusinessDayConvention, bool, DayCounter>();
+    class_<InterestRate>("InterestRate")
+        .function("rate", &InterestRate::rate);
+
     class_<Quote>("Quote");
     class_<SimpleQuote, base<Quote>>("SimpleQuote")
         .constructor<Real>();
     class_<Handle<Quote>>("QuoteHandle")
         .constructor(&createQuoteHandle, allow_raw_pointers());
+    class_<IMM>("IMM")
+        .class_function("nextDate", &immNextDate, allow_raw_pointers());
 
+    /* Indicies */
     class_<Index>("Index")
         .function("addFixing", &Index::addFixing);
     class_<InterestRateIndex, base<Index>>("InterestRateIndex")
@@ -402,12 +403,22 @@ EMSCRIPTEN_BINDINGS(quantlib)
     class_<Eonia, base<OvernightIndex>>("Eonia").constructor();
     class_<Libor, base<IborIndex>>("Libor");
     class_<USDLibor, base<Libor>>("USDLibor")
+        .constructor<Period>()
         .constructor<Period, Handle<YieldTermStructure>>();
 
-    class_<OISRateHelper>("OISRateHelper").constructor(&createOISRateHelper, allow_raw_pointers());
-    class_<DatedOISRateHelper>("DatedOISRateHelper").constructor(&createDatedOISRateHelper, allow_raw_pointers());
-    class_<FuturesRateHelper>("FuturesRateHelper").constructor(&createFuturesRateHelper, allow_raw_pointers());
-    class_<SwapRateHelper>("SwapRateHelper").constructor(&createSwapRateHelper, allow_raw_pointers());
+    /* Helpers */
+    class_<RateHelper>("RateHelper");
+    class_<DepositRateHelper, base<RateHelper>>("DepositRateHelper")
+        .constructor<Handle<Quote>, Period, Natural, Calendar, BusinessDayConvention, bool, DayCounter>();
+    class_<OISRateHelper, base<RateHelper>>("OISRateHelper").constructor(&createOISRateHelper, allow_raw_pointers());
+    class_<DatedOISRateHelper, base<RateHelper>>("DatedOISRateHelper").constructor(&createDatedOISRateHelper, allow_raw_pointers());
+    class_<FuturesRateHelper, base<RateHelper>>("FuturesRateHelper").constructor(&createFuturesRateHelper, allow_raw_pointers());
+    class_<SwapRateHelper, base<RateHelper>>("SwapRateHelper").constructor(&createSwapRateHelper, allow_raw_pointers());
+
+    class_<YieldTermStructure>("ZeroInflationTermStructure")
+        .function("zeroRate", &yieldTermStructureZeroRate, allow_raw_pointers());
+    class_<PiecewiseYieldCurve<Discount, Linear>, base<YieldTermStructure>>("PiecewiseYieldCurve<Discount,Linear>")
+        .constructor(&createPiecewiseYieldCurveDiscountLinear, allow_raw_pointers());
 }
 
 } // namespace
