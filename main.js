@@ -510,9 +510,9 @@ function billiontraderBootstrapping() {
         1.0e-15
     );
 
-    // depoFutSwapInstruments.forEach((d) => {
-    //     console.log(d.maturityDate().toISOString());
-    // });
+    depoFutSwapInstruments.forEach((d) => {
+        console.log(`${d.maturityDate().toISOString()}`);
+    });
 
     var matDate1 = new Date(25, February, 2015);
     var interestRate = depoFutSwapTermStructure.zeroRate(matDate1, depositDayCounter, Compounding.Simple, Frequency.Annual, true);

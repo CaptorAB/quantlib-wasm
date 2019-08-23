@@ -409,7 +409,8 @@ EMSCRIPTEN_BINDINGS(quantlib)
 
     /* Helpers */
     class_<RateHelper>("RateHelper")
-        .function("maturityDate", &RateHelper::maturityDate);
+        .function("maturityDate", &RateHelper::maturityDate)
+        .function("quote", &RateHelper::quote);
     class_<DepositRateHelper, base<RateHelper>>("DepositRateHelper")
         .constructor<Handle<Quote>, Period, Natural, Calendar, BusinessDayConvention, bool, DayCounter>();
     class_<OISRateHelper, base<RateHelper>>("OISRateHelper").constructor(&createOISRateHelper, allow_raw_pointers());
