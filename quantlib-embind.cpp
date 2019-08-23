@@ -390,7 +390,7 @@ EMSCRIPTEN_BINDINGS(quantlib)
         .constructor<Real>();
     class_<Handle<Quote>>("QuoteHandle")
         .constructor(&createQuoteHandle, allow_raw_pointers());
-        
+
     class_<Index>("Index")
         .function("addFixing", &Index::addFixing);
     class_<InterestRateIndex, base<Index>>("InterestRateIndex")
@@ -401,7 +401,8 @@ EMSCRIPTEN_BINDINGS(quantlib)
     class_<OvernightIndex, base<IborIndex>>("OvernightIndex");
     class_<Eonia, base<OvernightIndex>>("Eonia").constructor();
     class_<Libor, base<IborIndex>>("Libor");
-    class_<USDLibor, base<Libor>>("USDLibor").constructor<Period, Handle<YieldTermStructure>>();
+    class_<USDLibor, base<Libor>>("USDLibor")
+        .constructor<Period, Handle<YieldTermStructure>>();
 
     class_<OISRateHelper>("OISRateHelper").constructor(&createOISRateHelper, allow_raw_pointers());
     class_<DatedOISRateHelper>("DatedOISRateHelper").constructor(&createDatedOISRateHelper, allow_raw_pointers());
