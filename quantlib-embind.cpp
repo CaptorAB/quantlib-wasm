@@ -163,6 +163,7 @@ PiecewiseYieldCurve<Discount, Linear> *createPiecewiseYieldCurveDiscountLinear(D
 InterestRate *yieldTermStructureZeroRate(YieldTermStructure &yieldTermStructure, Date &d, DayCounter &resultDayCounter, Compounding comp, Frequency freq, bool extrapolate)
 {
     auto r = yieldTermStructure.zeroRate(d, resultDayCounter, comp, freq, extrapolate);
+    // std::cout << r.rate() << std::endl;
     return new InterestRate(r.rate(), r.dayCounter(), r.compounding(), r.frequency());
 }
 
@@ -407,7 +408,8 @@ EMSCRIPTEN_BINDINGS(quantlib)
         .constructor<Period, Handle<YieldTermStructure>>();
 
     /* Helpers */
-    class_<RateHelper>("RateHelper");
+    class_<RateHelper>("RateHelper")
+        .function("maturityDate", &RateHelper::maturityDate);
     class_<DepositRateHelper, base<RateHelper>>("DepositRateHelper")
         .constructor<Handle<Quote>, Period, Natural, Calendar, BusinessDayConvention, bool, DayCounter>();
     class_<OISRateHelper, base<RateHelper>>("OISRateHelper").constructor(&createOISRateHelper, allow_raw_pointers());

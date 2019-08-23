@@ -438,7 +438,9 @@ function billiontraderBootstrapping() {
     var settlementDate = calendar.adjust(d0, BusinessDayConvention.Following);
     var fixingDays = 2;
     var todaysDate = calendar.advance(settlementDate, -fixingDays, TimeUnit.Days, BusinessDayConvention.Following, false);
+    // console.log(todaysDate.toISOString());
     setValuationDate(todaysDate);
+
     var depositDayCounter = new Actual360();
     var depositsBusinessDayConvention = BusinessDayConvention.ModifiedFollowing;
 
@@ -465,14 +467,13 @@ function billiontraderBootstrapping() {
     var futMonths = 3;
     var futures = [{ rate: 99.725 }, { rate: 99.585 }, { rate: 99.385 }, { rate: 99.16 }, { rate: 98.93 }, { rate: 98.715 }];
     var imm = IMM.nextDate(settlementDate, true);
-    console.log(imm.toISOString());
     futures.forEach((d) => {
         var quote = new QuoteHandle(d.rate);
         depoFutSwapInstruments.push(
             new FuturesRateHelper(quote, imm, futMonths, calendar, BusinessDayConvention.ModifiedFollowing, true, depositDayCounter)
         );
         trashcan.push(imm);
-        imm = IMM.nextDate(settlementDate, true);
+        imm = IMM.nextDate(imm, true);
         trashcan.push(quote);
     });
 
@@ -508,6 +509,10 @@ function billiontraderBootstrapping() {
         termStructureDayCounter,
         1.0e-15
     );
+
+    // depoFutSwapInstruments.forEach((d) => {
+    //     console.log(d.maturityDate().toISOString());
+    // });
 
     var matDate1 = new Date(25, February, 2015);
     var interestRate = depoFutSwapTermStructure.zeroRate(matDate1, depositDayCounter, Compounding.Simple, Frequency.Annual, true);
