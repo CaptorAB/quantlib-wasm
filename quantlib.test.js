@@ -109,6 +109,8 @@ describe("captor/quantlib", () => {
     });
 
     test("Bootstrapping", async () => {
+        // Replication of
+        // http://billiontrader.com/2015/02/16/bootstrapping-with-quantlib/
         const { Date, UnitedKingdom, UnitedStates, JointCalendar, UnitedKingdomMarket, UnitedStatesMarket, JointCalendarRule } = QuantLib;
         const { TimeUnit, BusinessDayConvention, Month, setValuationDate, Actual360, QuoteHandle, Period, DepositRateHelper } = QuantLib;
         const { IMM, FuturesRateHelper, SwapRateHelper, Frequency, USDLibor, Compounding } = QuantLib;
