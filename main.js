@@ -14,6 +14,7 @@ const toWasmVector = (arr, type) => {
 };
 
 const toCurveItem = (date, value) => ({ date, value });
+const hrtimeDiffToMs = (t0, t1) => 1000 * (t1[0] - t0[0]) + (t1[1] - t0[1]) / 1000000;
 
 function performanceTest() {
     const { sqrt } = Math;
@@ -32,7 +33,6 @@ function performanceTest() {
 
         return sqrt((sx2 - sqr(sx) / n) / (n - 1));
     };
-    const hrtimeDiffToMs = (t0, t1) => 1000 * (t1[0] - t0[0]) + (t1[1] - t0[1]) / 1000000;
 
     var arr = [...Array(400000)].map((d, i) => i + 1);
     var t0 = process.hrtime();
@@ -88,17 +88,17 @@ function replicateSwapExample2() {
     var fixedTenor = new Period(1, TimeUnit.Years);
     var floatTenor = new Period(3, TimeUnit.Months);
 
-    var curveDates = new QuantLib.vector$Date$(3);
+    var curveDates = new QuantLib.Vector$Date$(3);
     var curveDateObjs = [Date.fromISOString("2013-12-31"), Date.fromISOString("2024-12-31")];
     curveDates.set(0, valuationDate);
     curveDateObjs.forEach((d, i) => curveDates.set(i + 1, d));
 
-    var forwardCurveDfs = new QuantLib.vector$double$(3);
+    var forwardCurveDfs = new QuantLib.Vector$double$(3);
     forwardCurveDfs.set(0, 1);
     forwardCurveDfs.set(1, 0.99);
     forwardCurveDfs.set(2, 0.8);
 
-    var discountCurveDfs = new QuantLib.vector$double$(3);
+    var discountCurveDfs = new QuantLib.Vector$double$(3);
     discountCurveDfs.set(0, 1);
     discountCurveDfs.set(1, 0.999);
     discountCurveDfs.set(2, 0.89);
@@ -107,7 +107,7 @@ function replicateSwapExample2() {
     var forwardingTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, forwardCurveDfs, actual360);
     var discountTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, discountCurveDfs, actual360);
 
-    var calendar = QuantLib.Sweden;
+    var calendar = new QuantLib.Sweden();
     var convention = BusinessDayConvention.ModifiedFollowing;
     var terminationDateConvention = BusinessDayConvention.ModifiedFollowing;
     var rule = DateGenerationRule.Forward;
@@ -185,7 +185,8 @@ function replicateSwapExample2() {
         euribor,
         previousFixingDate,
         swap,
-        actual360
+        actual360,
+        calendar
     ].forEach((d) => d.delete());
 
     ms.push(QuantLib.mallinfo());
@@ -198,60 +199,6 @@ function replicateSwapExample2() {
     // );
 
     return v;
-}
-
-function replicateSwapExample1() {
-    var valuationDate = new Date("2012-12-31");
-
-    var nominal = 1000000.0;
-    var previousResetDate = new Date("2012-11-20");
-    var maturity = new Date("2022-11-20");
-    var spread = 0.02;
-    var fixedRate = 0.04;
-    var previousResetValue = 0.01;
-
-    var fixedScheduleCount = 1;
-    var fixedScheduleTimeUnit = QuantLib.TimeUnit.Years;
-    var floatScheduleCount = 3;
-    var floatScheduleTimeUnit = QuantLib.TimeUnit.Months;
-
-    var forwardCurveDayCountConvention = QuantLib.DayCountConvention.Actual360;
-    var oisCurveDayCountConvention = QuantLib.DayCountConvention.Actual360;
-
-    var d0 = new Date("2013-12-31");
-    var d1 = new Date("2024-12-31");
-    var forwardCurve = [toCurveItem(valuationDate, 1), toCurveItem(d0, 0.99), toCurveItem(d1, 0.8)];
-    var oisCurve = [toCurveItem(valuationDate, 1), toCurveItem(d0, 0.999), toCurveItem(d1, 0.89)];
-
-    var wasmValuationDate = dateToSerialNumber(valuationDate);
-    var wasmPreviousResetDate = dateToSerialNumber(previousResetDate);
-    var wasmMaturity = dateToSerialNumber(maturity);
-    var wasmForwardCurveDates = toWasmIntVector(forwardCurve.map((d) => dateToSerialNumber(d.date)));
-    var wasmForwardCurveDfs = toWasmDoubleVector(forwardCurve.map((d) => d.value));
-    var wasmOisCurveDates = toWasmIntVector(oisCurve.map((d) => dateToSerialNumber(d.date)));
-    var wasmOisCurveDfs = toWasmDoubleVector(oisCurve.map((d) => d.value));
-
-    console.log(
-        QuantLib.swapNpv(
-            nominal,
-            fixedRate,
-            spread,
-            wasmValuationDate,
-            wasmMaturity,
-            wasmPreviousResetDate,
-            previousResetValue,
-            fixedScheduleCount,
-            fixedScheduleTimeUnit,
-            floatScheduleCount,
-            floatScheduleTimeUnit,
-            forwardCurveDayCountConvention,
-            oisCurveDayCountConvention,
-            wasmForwardCurveDates,
-            wasmForwardCurveDfs,
-            wasmOisCurveDates,
-            wasmOisCurveDfs
-        )
-    );
 }
 
 function generateSchedule() {
@@ -575,10 +522,10 @@ QuantLibLoader.onRuntimeInitialized = () => {
     // }
     // var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
 
-    for (let i = 0; i < 3; i++) {
-        var m0 = QuantLib.mallinfo();
-        billiontraderBootstrapping();
-        var m1 = QuantLib.mallinfo();
-        console.log(bytesDiff(m0, m1));
+    for (let i = 0; i < 1; i++) {
+        // var m0 = QuantLib.mallinfo();
+        console.log(replicateSwapExample2());
+        // var m1 = QuantLib.mallinfo();
+        // console.log(bytesDiff(m0, m1));
     }
 };

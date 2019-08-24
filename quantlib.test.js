@@ -268,4 +268,134 @@ describe("captor/quantlib", () => {
         ].join("\r\n");
         expect(log.join("\r\n")).toBe(result);
     });
+
+    test("Swap NPV", () => {
+        const {
+            Date,
+            Period,
+            TimeUnit,
+            BusinessDayConvention,
+            DateGenerationRule,
+            Schedule,
+            VanillaSwapType,
+            VanillaSwap,
+            setValuationDate,
+            Thirty360,
+            Actual360,
+            Euribor
+        } = QuantLib;
+
+        var valuationDate = Date.fromISOString("2012-12-31");
+        setValuationDate(valuationDate);
+
+        var nominal = 1000000.0;
+        var previousResetDate = Date.fromISOString("2012-11-20");
+        var maturity = Date.fromISOString("2022-11-20");
+        var spread = 0.02;
+        var fixedRate = 0.04;
+        var previousResetValue = 0.01;
+
+        var fixedTenor = new Period(1, TimeUnit.Years);
+        var floatTenor = new Period(3, TimeUnit.Months);
+
+        var curveDates = new QuantLib.Vector$Date$(3);
+        var curveDateObjs = [Date.fromISOString("2013-12-31"), Date.fromISOString("2024-12-31")];
+        curveDates.set(0, valuationDate);
+        curveDateObjs.forEach((d, i) => curveDates.set(i + 1, d));
+
+        var forwardCurveDfs = new QuantLib.Vector$double$(3);
+        forwardCurveDfs.set(0, 1);
+        forwardCurveDfs.set(1, 0.99);
+        forwardCurveDfs.set(2, 0.8);
+
+        var discountCurveDfs = new QuantLib.Vector$double$(3);
+        discountCurveDfs.set(0, 1);
+        discountCurveDfs.set(1, 0.999);
+        discountCurveDfs.set(2, 0.89);
+
+        var actual360 = new Actual360();
+        var forwardingTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, forwardCurveDfs, actual360);
+        var discountTermStructure = QuantLib.createLogLinearYieldTermStructure(curveDates, discountCurveDfs, actual360);
+
+        var calendar = new QuantLib.Sweden();
+        var convention = BusinessDayConvention.ModifiedFollowing;
+        var terminationDateConvention = BusinessDayConvention.ModifiedFollowing;
+        var rule = DateGenerationRule.Forward;
+        var endOfMonth = false;
+        var firstDate = new Date();
+        var nextToLastDate = new Date();
+
+        var fixedDayCount = new Thirty360();
+        var floatingDayCount = new Actual360();
+
+        var fixedSchedule = new Schedule(
+            previousResetDate,
+            maturity,
+            fixedTenor,
+            calendar,
+            convention,
+            terminationDateConvention,
+            rule,
+            endOfMonth,
+            firstDate,
+            nextToLastDate
+        );
+        var floatSchedule = new Schedule(
+            previousResetDate,
+            maturity,
+            floatTenor,
+            calendar,
+            convention,
+            terminationDateConvention,
+            rule,
+            endOfMonth,
+            firstDate,
+            nextToLastDate
+        );
+
+        var previousResetValue = 0.01;
+        var euribor = new Euribor(floatTenor, forwardingTermStructure);
+        var previousFixingDate = euribor.fixingDate(previousResetDate);
+        euribor.addFixing(previousFixingDate, previousResetValue, true);
+
+        var swap = new VanillaSwap(
+            VanillaSwapType.Payer,
+            nominal,
+            fixedSchedule,
+            fixedRate,
+            fixedDayCount,
+            floatSchedule,
+            euribor,
+            spread,
+            floatingDayCount
+        );
+        swap.setPricingEngine(discountTermStructure);
+        var npv = swap.NPV();
+        [
+            ...curveDateObjs,
+            valuationDate,
+            maturity,
+            fixedTenor,
+            floatTenor,
+            curveDates,
+            forwardCurveDfs,
+            discountCurveDfs,
+            forwardingTermStructure,
+            discountTermStructure,
+            firstDate,
+            nextToLastDate,
+            fixedDayCount,
+            fixedSchedule,
+            floatingDayCount,
+            floatSchedule,
+            previousResetDate,
+            euribor,
+            previousFixingDate,
+            swap,
+            actual360,
+            calendar
+        ].forEach((d) => d.delete());
+
+        expect(npv).toBe(-11836.336319737078);
+    });
 });
