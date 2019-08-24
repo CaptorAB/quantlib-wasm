@@ -284,15 +284,17 @@ describe("captor/quantlib", () => {
             setValuationDate,
             Thirty360,
             Actual360,
-            Euribor
+            Euribor,
+            Month
         } = QuantLib;
+        const { January, February, March, April, May, June, July, August, September, October, November, December } = Month;
 
-        var valuationDate = Date.fromISOString("2012-12-31");
+        var valuationDate = new Date(31, December, 2012);
         setValuationDate(valuationDate);
 
         var nominal = 1000000.0;
-        var previousResetDate = Date.fromISOString("2012-11-20");
-        var maturity = Date.fromISOString("2022-11-20");
+        var previousResetDate = new Date(20, November, 2012);
+        var maturity = new Date(20, November, 2022);
         var spread = 0.02;
         var fixedRate = 0.04;
         var previousResetValue = 0.01;
@@ -301,7 +303,7 @@ describe("captor/quantlib", () => {
         var floatTenor = new Period(3, TimeUnit.Months);
 
         var curveDates = new QuantLib.Vector$Date$(3);
-        var curveDateObjs = [Date.fromISOString("2013-12-31"), Date.fromISOString("2024-12-31")];
+        var curveDateObjs = [new Date(31, December, 2013), new Date(31, December, 2024)];
         curveDates.set(0, valuationDate);
         curveDateObjs.forEach((d, i) => curveDates.set(i + 1, d));
 
