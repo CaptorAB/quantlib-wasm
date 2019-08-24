@@ -69,6 +69,13 @@ string calendarToString(Date &d)
     return stream.str();
 }
 
+string interestRateToString(InterestRate &r)
+{
+    stringstream stream;
+    stream << r;
+    return stream.str();
+}
+
 Date calendarAdvance(Calendar &cal, Date &d, Integer n, TimeUnit unit, BusinessDayConvention c, bool endOfMonth)
 {
     return cal.advance(d, n, unit, c, endOfMonth);
@@ -163,8 +170,19 @@ PiecewiseYieldCurve<Discount, Linear> *createPiecewiseYieldCurveDiscountLinear(D
 InterestRate *yieldTermStructureZeroRate(YieldTermStructure &yieldTermStructure, Date &d, DayCounter &resultDayCounter, Compounding comp, Frequency freq, bool extrapolate)
 {
     auto r = yieldTermStructure.zeroRate(d, resultDayCounter, comp, freq, extrapolate);
-    // std::cout << r.rate() << std::endl;
-    return new InterestRate(r.rate(), r.dayCounter(), r.compounding(), r.frequency());
+    return new InterestRate(r.rate(), r.dayCounter(), r.compounding(), r.frequency()); // Copies from stack to heap memory
+}
+
+DiscountFactor yieldTermStructureDiscount(YieldTermStructure &yieldTermStructure, Date &d, bool extrapolate)
+{
+    return yieldTermStructure.discount(d, extrapolate);
+}
+
+InterestRate *yieldTermStructureForwardRate(YieldTermStructure &yieldTermStructure, Date &d1, Date &d2,
+                                            DayCounter &resultDayCounter, Compounding comp, Frequency freq, bool extrapolate)
+{
+    auto r = yieldTermStructure.forwardRate(d1, d2, resultDayCounter, comp, freq, extrapolate);
+    return new InterestRate(r.rate(), r.dayCounter(), r.compounding(), r.frequency()); // Copies from stack to heap memory
 }
 
 EMSCRIPTEN_BINDINGS(quantlib)
@@ -382,7 +400,8 @@ EMSCRIPTEN_BINDINGS(quantlib)
     emscripten::function("setValuationDate", &setValuationDate);
     emscripten::function("createLogLinearYieldTermStructure", &createLogLinearYieldTermStructure, allow_raw_pointers());
     class_<InterestRate>("InterestRate")
-        .function("rate", &InterestRate::rate);
+        .function("rate", &InterestRate::rate)
+        .function("toString", &interestRateToString);
 
     class_<Quote>("Quote");
     class_<SimpleQuote, base<Quote>>("SimpleQuote")
@@ -419,7 +438,9 @@ EMSCRIPTEN_BINDINGS(quantlib)
     class_<SwapRateHelper, base<RateHelper>>("SwapRateHelper").constructor(&createSwapRateHelper, allow_raw_pointers());
 
     class_<YieldTermStructure>("ZeroInflationTermStructure")
-        .function("zeroRate", &yieldTermStructureZeroRate, allow_raw_pointers());
+        .function("zeroRate", &yieldTermStructureZeroRate, allow_raw_pointers())
+        .function("discount", &yieldTermStructureDiscount)
+        .function("forwardRate", &yieldTermStructureForwardRate, allow_raw_pointers());
     class_<PiecewiseYieldCurve<Discount, Linear>, base<YieldTermStructure>>("PiecewiseYieldCurve<Discount,Linear>")
         .constructor(&createPiecewiseYieldCurveDiscountLinear, allow_raw_pointers());
 }

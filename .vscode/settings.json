@@ -92,6 +92,18 @@
         "string_view": "cpp",
         "__functional_base_03": "cpp",
         "*.ipp": "cpp",
-        "__functional_03": "cpp"
+        "__functional_03": "cpp",
+        "codecvt": "cpp",
+        "condition_variable": "cpp",
+        "csignal": "cpp",
+        "future": "cpp",
+        "queue": "cpp",
+        "random": "cpp",
+        "shared_mutex": "cpp",
+        "strstream": "cpp",
+        "typeindex": "cpp",
+        "unordered_set": "cpp",
+        "variant": "cpp",
+        "coroutine": "cpp"
     }
 }

@@ -14,27 +14,29 @@ Is there anyone with a definitive word about this?
 // namespace { unsigned int u = _controlfp(_EM_INEXACT, _MCW_EM); }
 #endif
 
-#include <boost/timer.hpp>
+#include <ql/quantlib.hpp>
+//#include <boost/timer.hpp>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 
+using namespace std;
 using namespace QuantLib;
 
 #if defined(QL_ENABLE_SESSIONS)
-namespace QuantLib {
+namespace QuantLib
+{
 
-	Integer sessionId() { return 0; }
+Integer sessionId() { return 0; }
 
-}
+} // namespace QuantLib
 #endif
-
 
 using namespace QuantLib;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-	Calendar calendar = JointCalendar(UnitedKingdom(UnitedKingdom::Exchange),UnitedStates(UnitedStates::Settlement), JoinHolidays);
+    Calendar calendar = JointCalendar(UnitedKingdom(UnitedKingdom::Exchange), UnitedStates(UnitedStates::Settlement), JoinHolidays);
 
     Date settlementDate(18, February, 2015);
     settlementDate = calendar.adjust(settlementDate);
@@ -51,18 +53,18 @@ int main(int argc, char* argv[])
     boost::shared_ptr<Quote> d1mRate(new SimpleQuote(d1mQuote));
     boost::shared_ptr<Quote> d2mRate(new SimpleQuote(d2mQuote));
     boost::shared_ptr<Quote> d3mRate(new SimpleQuote(d3mQuote));
-    boost::shared_ptr<RateHelper> d1w(new DepositRateHelper(Handle<Quote>(d1wRate), 7*Days, fixingDays, calendar, ModifiedFollowing, true, depositDayCounter));
-    boost::shared_ptr<RateHelper> d1m(new DepositRateHelper(Handle<Quote>(d1mRate), 4*Weeks, fixingDays, calendar, ModifiedFollowing, true, depositDayCounter));
+    boost::shared_ptr<RateHelper> d1w(new DepositRateHelper(Handle<Quote>(d1wRate), 7 * Days, fixingDays, calendar, ModifiedFollowing, true, depositDayCounter));
+    boost::shared_ptr<RateHelper> d1m(new DepositRateHelper(Handle<Quote>(d1mRate), 4 * Weeks, fixingDays, calendar, ModifiedFollowing, true, depositDayCounter));
     boost::shared_ptr<RateHelper> d2m(new DepositRateHelper(Handle<Quote>(d2mRate), 2 * Months, fixingDays, calendar, ModifiedFollowing, true, depositDayCounter));
     boost::shared_ptr<RateHelper> d3m(new DepositRateHelper(Handle<Quote>(d3mRate), 3 * Months, fixingDays, calendar, ModifiedFollowing, true, depositDayCounter));
 
     DayCounter FutDayCounter = Actual360();
     Real fut1Quote = 99.725; // 0.2750
     Real fut2Quote = 99.585; // 0.4150
-    Real fut3Quote = 99.385;  //0.6150
+    Real fut3Quote = 99.385; //0.6150
     Real fut4Quote = 99.16;  // 0.84
     Real fut5Quote = 98.93;  // 1.07
-    Real fut6Quote = 98.715;  // 1.285
+    Real fut6Quote = 98.715; // 1.285
     boost::shared_ptr<Quote> fut1Price(new SimpleQuote(fut1Quote));
     boost::shared_ptr<Quote> fut2Price(new SimpleQuote(fut2Quote));
     boost::shared_ptr<Quote> fut3Price(new SimpleQuote(fut3Quote));
@@ -80,13 +82,10 @@ int main(int argc, char* argv[])
     imm = IMM::nextDate(imm + 1);
     boost::shared_ptr<RateHelper> fut4(new FuturesRateHelper(Handle<Quote>(fut4Price), imm, futMonths, calendar, ModifiedFollowing, true, depositDayCounter));
 
-    
     imm = IMM::nextDate(imm + 1);
     boost::shared_ptr<RateHelper> fut5(new FuturesRateHelper(Handle<Quote>(fut5Price), imm, futMonths, calendar, ModifiedFollowing, true, depositDayCounter));
     imm = IMM::nextDate(imm + 1);
     boost::shared_ptr<RateHelper> fut6(new FuturesRateHelper(Handle<Quote>(fut6Price), imm, futMonths, calendar, ModifiedFollowing, true, depositDayCounter));
-
-    
 
     Rate s2yQuote = 0.0089268;
     Rate s3yQuote = 0.0123343;
@@ -103,7 +102,6 @@ int main(int argc, char* argv[])
     BusinessDayConvention swFixedLegConvention = Unadjusted;
     DayCounter swFixedLegDayCounter = Actual360();
     boost::shared_ptr<IborIndex> swFloatingLegIndex(new USDLibor(Period(3, Months)));
-
 
     boost::shared_ptr<RateHelper> s2y(new SwapRateHelper(
         Handle<Quote>(s2yRate), 2 * Years,
@@ -130,8 +128,9 @@ int main(int argc, char* argv[])
         calendar, swFixedLegFrequency,
         swFixedLegConvention, swFixedLegDayCounter,
         swFloatingLegIndex));
-    
-    std::vector<boost::shared_ptr<RateHelper> > depoFutSwapInstruments;
+
+    typedef boost::shared_ptr<RateHelper> SharedPtrRateHelper;
+    vector<SharedPtrRateHelper> depoFutSwapInstruments;
     depoFutSwapInstruments.push_back(d1w);
     depoFutSwapInstruments.push_back(d1m);
     depoFutSwapInstruments.push_back(d2m);
@@ -149,13 +148,13 @@ int main(int argc, char* argv[])
     depoFutSwapInstruments.push_back(s6y);
 
     DayCounter termStructureDayCounter = Actual360();
-    boost::shared_ptr<YieldTermStructure> depoFutSwapTermStructure(new PiecewiseYieldCurve<Discount, 
-	           Linear>(settlementDate, depoFutSwapInstruments, termStructureDayCounter, 1.0e-15));
-
+    boost::shared_ptr<YieldTermStructure> depoFutSwapTermStructure(new PiecewiseYieldCurve<Discount,
+                                                                                           Linear>(settlementDate, depoFutSwapInstruments, termStructureDayCounter, 1.0e-15));
     Date matDate1(25, February, 2015);
     Date matDate2(18, March, 2015);
     Date matDate3(20, April, 2015);
     Date matDate4(18, May, 2015);
+
     Date matDate5(17, June, 2015);
     Date matDate6(16, September, 2015);
     Date matDate7(16, December, 2015);
@@ -168,7 +167,6 @@ int main(int argc, char* argv[])
     Date matDate13(19, February, 2019);
     Date matDate14(18, February, 2020);
 
-    
     std::cout << "0.1375: " << depoFutSwapTermStructure->zeroRate(matDate1, depositDayCounter, Simple) << std::endl;
     std::cout << "0.1717: " << depoFutSwapTermStructure->zeroRate(matDate2, depositDayCounter, Simple) << std::endl;
     std::cout << "0.2112: " << depoFutSwapTermStructure->zeroRate(matDate3, depositDayCounter, Simple) << std::endl;
@@ -184,9 +182,9 @@ int main(int argc, char* argv[])
     std::cout << "0.89446: " << depoFutSwapTermStructure->zeroRate(matDate11, FutDayCounter, Compounded, Annual) << std::endl;
     std::cout << "1.23937: " << depoFutSwapTermStructure->zeroRate(matDate12, FutDayCounter, Compounded, Annual) << std::endl;
     std::cout << "1.49085: " << depoFutSwapTermStructure->zeroRate(matDate13, FutDayCounter, Compounded, Annual) << std::endl;
-    std::cout << "1.67450: " << depoFutSwapTermStructure->zeroRate(matDate14, FutDayCounter, Compounded,Annual) << std::endl;
-    std::cout << " discount Rate : " << depoFutSwapTermStructure->discount(matDate14) << std::endl;
-    std::cout << " Forward Rate : " << depoFutSwapTermStructure->forwardRate(matDate13,matDate14,FutDayCounter,Simple) << std::endl;
+    std::cout << "1.67450: " << depoFutSwapTermStructure->zeroRate(matDate14, FutDayCounter, Compounded, Annual) << std::endl;
+    std::cout << "Discount Rate : " << depoFutSwapTermStructure->discount(matDate14) << std::endl;
+    std::cout << "Forward Rate : " << depoFutSwapTermStructure->forwardRate(matDate13, matDate14, FutDayCounter, Simple) << std::endl;
 
     /*
     std::ofstream myfile;

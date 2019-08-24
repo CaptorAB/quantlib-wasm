@@ -427,8 +427,9 @@ function billiontraderBootstrapping() {
     const { Date, UnitedKingdom, UnitedStates, JointCalendar, UnitedKingdomMarket, UnitedStatesMarket, JointCalendarRule } = QuantLib;
     const { TimeUnit, BusinessDayConvention, Month, setValuationDate, Actual360, QuoteHandle, Period, DepositRateHelper } = QuantLib;
     const { IMM, FuturesRateHelper, SwapRateHelper, Frequency, USDLibor, Compounding } = QuantLib;
-    const { February } = Month;
+    const { January, February, March, April, May, June, July, August, September, October, November, December } = Month;
     const { Days, Weeks, Months, Years } = TimeUnit;
+    const { Simple, Compounded } = Compounding;
 
     var cal1 = new UnitedKingdom(UnitedKingdomMarket.Exchange);
     var cal2 = new UnitedStates(UnitedStatesMarket.Settlement);
@@ -438,13 +439,14 @@ function billiontraderBootstrapping() {
     var settlementDate = calendar.adjust(d0, BusinessDayConvention.Following);
     var fixingDays = 2;
     var todaysDate = calendar.advance(settlementDate, -fixingDays, TimeUnit.Days, BusinessDayConvention.Following, false);
-    // console.log(todaysDate.toISOString());
     setValuationDate(todaysDate);
 
     var depositDayCounter = new Actual360();
     var depositsBusinessDayConvention = BusinessDayConvention.ModifiedFollowing;
 
-    var trashcan = [cal1, cal2, calendar, d0, settlementDate, depositDayCounter];
+    var trashcan = [cal1, cal2, calendar, d0, settlementDate, todaysDate, depositDayCounter];
+
+    var depoFutSwapInstruments = [];
 
     var deposits = [
         { rate: 0.001375, periods: 7, unit: Days },
@@ -452,7 +454,6 @@ function billiontraderBootstrapping() {
         { rate: 0.002112, periods: 2, unit: Months },
         { rate: 0.002581, periods: 3, unit: Months }
     ];
-    var depoFutSwapInstruments = [];
     deposits.forEach((d) => {
         var quote = new QuoteHandle(d.rate);
         var period = new Period(d.periods, d.unit);
@@ -467,6 +468,7 @@ function billiontraderBootstrapping() {
     var futMonths = 3;
     var futures = [{ rate: 99.725 }, { rate: 99.585 }, { rate: 99.385 }, { rate: 99.16 }, { rate: 98.93 }, { rate: 98.715 }];
     var imm = IMM.nextDate(settlementDate, true);
+    trashcan.push(futDayCounter);
     futures.forEach((d) => {
         var quote = new QuoteHandle(d.rate);
         depoFutSwapInstruments.push(
@@ -476,20 +478,23 @@ function billiontraderBootstrapping() {
         imm = IMM.nextDate(imm, true);
         trashcan.push(quote);
     });
+    trashcan.push(imm);
 
     var swFixedLegFrequency = Frequency.Annual;
     var swFixedLegConvention = BusinessDayConvention.Unadjusted;
     var swFixedLegDayCounter = new Actual360();
     var swFloatingLegIndexPeriod = new Period(3, Months);
     var swFloatingLegIndex = new USDLibor(swFloatingLegIndexPeriod);
+    trashcan.push(swFixedLegDayCounter);
     trashcan.push(swFloatingLegIndexPeriod);
+    trashcan.push(swFloatingLegIndex);
 
     var swaps = [
-        { rate: 0.0089268, periods: 1, unit: Years },
-        { rate: 0.0123343, periods: 2, unit: Years },
-        { rate: 0.0147985, periods: 3, unit: Years },
-        { rate: 0.0165843, periods: 4, unit: Years },
-        { rate: 0.0179191, periods: 5, unit: Years }
+        { rate: 0.0089268, periods: 2, unit: Years },
+        { rate: 0.0123343, periods: 3, unit: Years },
+        { rate: 0.0147985, periods: 4, unit: Years },
+        { rate: 0.0165843, periods: 5, unit: Years },
+        { rate: 0.0179191, periods: 6, unit: Years }
     ];
     swaps.forEach((d) => {
         var quote = new QuoteHandle(d.rate);
@@ -502,6 +507,7 @@ function billiontraderBootstrapping() {
     });
 
     var termStructureDayCounter = new Actual360();
+    trashcan.push(termStructureDayCounter);
     var instrs = toWasmVector(depoFutSwapInstruments, QuantLib.Vector$RateHelper$);
     var depoFutSwapTermStructure = new QuantLib.PiecewiseYieldCurve$Discount$Linear$(
         settlementDate,
@@ -510,13 +516,43 @@ function billiontraderBootstrapping() {
         1.0e-15
     );
 
-    depoFutSwapInstruments.forEach((d) => {
-        console.log(`${d.maturityDate().toISOString()}`);
+    var maturities = [
+        [0.1375, new Date(25, February, 2015), Simple],
+        [0.1717, new Date(18, March, 2015), Simple],
+        [0.2112, new Date(20, April, 2015), Simple],
+        [0.2581, new Date(18, May, 2015), Simple],
+        [0.25093, new Date(17, June, 2015), Simple],
+        [0.32228, new Date(16, September, 2015), Simple],
+        [0.41111, new Date(16, December, 2015), Simple],
+        [0.51112, new Date(16, March, 2016), Simple],
+        [0.61698, new Date(15, June, 2016), Simple],
+        [0.73036, new Date(21, September, 2016), Compounded],
+        [0.89446, new Date(21, February, 2017), Compounded],
+        [1.23937, new Date(20, February, 2018), Compounded],
+        [1.49085, new Date(19, February, 2019), Compounded],
+        [1.6745, new Date(18, February, 2020), Compounded]
+    ];
+    var log = [];
+    maturities.forEach((d, i) => {
+        var interestRate = depoFutSwapTermStructure.zeroRate(d[1], depositDayCounter, d[2], Frequency.Annual, false);
+        log.push(`${d[0]}: ${interestRate.toString()}`);
+        interestRate.delete();
     });
+    log.push(`Discount Rate : ${depoFutSwapTermStructure.discount(maturities[13][1], false).toFixed(6)}`);
+    var forwardRate = depoFutSwapTermStructure.forwardRate(
+        maturities[12][1],
+        maturities[13][1],
+        futDayCounter,
+        Simple,
+        Frequency.Annual,
+        false
+    );
+    log.push(`Forward Rate : ${forwardRate}`);
+    trashcan.push(forwardRate);
+    maturities.forEach((d) => trashcan.push(d[1]));
 
-    var matDate1 = new Date(25, February, 2015);
-    var interestRate = depoFutSwapTermStructure.zeroRate(matDate1, depositDayCounter, Compounding.Simple, Frequency.Annual, true);
-    console.log(interestRate.rate());
+    trashcan.push(depoFutSwapTermStructure);
+    trashcan.push(instrs);
 
     trashcan.forEach((d) => d.delete());
 }
@@ -539,5 +575,10 @@ QuantLibLoader.onRuntimeInitialized = () => {
     // }
     // var s = QuantLib.createScheduleFromDates(toWasmIntVector([35000, 36000]));
 
-    billiontraderBootstrapping();
+    for (let i = 0; i < 3; i++) {
+        var m0 = QuantLib.mallinfo();
+        billiontraderBootstrapping();
+        var m1 = QuantLib.mallinfo();
+        console.log(bytesDiff(m0, m1));
+    }
 };
