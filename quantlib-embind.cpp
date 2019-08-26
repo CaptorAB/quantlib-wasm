@@ -118,6 +118,11 @@ Handle<Quote> *createQuoteHandle(Rate rate)
     return new Handle<Quote>(ptrQuote);
 }
 
+Real handleQuoteValue(Handle<Quote> &quote)
+{
+    return ((ext::shared_ptr<Quote> &)quote.currentLink())->value();
+}
+
 OISRateHelper *createOISRateHelper(Natural settlementDays, Period &tenor, Handle<Quote> &fixedRate, OvernightIndex &overnightIndex
                                    /*, Handle<YieldTermStructure> &discountingCurve, bool telescopicValueDates, Natural paymentLag,
                                    BusinessDayConvention paymentConvention, Frequency paymentFrequency, Calendar &paymentCalendar, Period &forwardStart,
@@ -167,10 +172,44 @@ PiecewiseYieldCurve<Discount, Linear> *createPiecewiseYieldCurveDiscountLinear(D
     return new PiecewiseYieldCurve<Discount, Linear>(referenceDate, ptrs, dayCounter, accuracy);
 }
 
+void handle_eptr(std::exception_ptr eptr) // passing by value is ok
+{
+    try
+    {
+        if (eptr)
+        {
+            std::rethrow_exception(eptr);
+        }
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << "Caught exception \"" << e.what() << "\"\n";
+    }
+}
+
 InterestRate *yieldTermStructureZeroRate(YieldTermStructure &yieldTermStructure, Date &d, DayCounter &resultDayCounter, Compounding comp, Frequency freq, bool extrapolate)
 {
+    // try
+    // {
+    // std::cout << "Uno" << std::endl;
+    // auto dates = yieldTermStructure.jumpDates();
+    // std::cout << "Due" << std::endl;
+    // for (int i=0; i<dates.size(); i++)
+    // {
+    //     std::cout << dates[i] << std::endl;
+    // }
+    // std::cout << "Tre" << std::endl;
     auto r = yieldTermStructure.zeroRate(d, resultDayCounter, comp, freq, extrapolate);
+    // std::cout << "Quattro" << std::endl;
     return new InterestRate(r.rate(), r.dayCounter(), r.compounding(), r.frequency()); // Copies from stack to heap memory
+    // }
+    // catch (...)
+    // {
+    //     std::exception_ptr eptr = std::current_exception();
+    //     handle_eptr(eptr);
+    //     // std::cout << eptr->what() << std::endl;
+    // }
+    // return NULL;
 }
 
 DiscountFactor yieldTermStructureDiscount(YieldTermStructure &yieldTermStructure, Date &d, bool extrapolate)
@@ -407,7 +446,8 @@ EMSCRIPTEN_BINDINGS(quantlib)
     class_<SimpleQuote, base<Quote>>("SimpleQuote")
         .constructor<Real>();
     class_<Handle<Quote>>("QuoteHandle")
-        .constructor(&createQuoteHandle, allow_raw_pointers());
+        .constructor(&createQuoteHandle, allow_raw_pointers())
+        .function("value", &handleQuoteValue);
     class_<IMM>("IMM")
         .class_function("nextDate", &immNextDate, allow_raw_pointers());
 
