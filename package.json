@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "test": "jest quantlib.test.js --detectOpenHandles --maxWorkers=1 --forceExit",
-        "build:wasm": "cross-var docker run -v $INIT_CWD:/src -it --rm captorab/emscripten-quantlib:1.19.1 make"
+        "build:wasm": "cross-var docker run -v $INIT_CWD:/src -it --rm captorab/emscripten-quantlib:1.19.3 make"
     },
     "repository": {
         "type": "git",

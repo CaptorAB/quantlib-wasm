@@ -1,5 +1,5 @@
 ## -*- docker-image-name: "emscripten-quantlib" -*-
-FROM trzeci/emscripten:latest
+FROM emscripten/emsdk:1.39.15-upstream
 
 RUN apt-get update && \
     apt-get -y upgrade && \
@@ -62,18 +62,17 @@ RUN wget https://bintray.com/quantlib/releases/download_file?file_path=QuantLib-
 # How to use emconfigure and emmake, [see](https://emscripten.org/docs/compiling/Building-Projects.html)
 # Also a good [guide](https://adamrehn.com/articles/creating-javascript-bindings-for-c-cxx-libraries-with-emscripten/)
 
-#WORKDIR ${QUANTLIB}
+WORKDIR ${QUANTLIB}
 RUN echo $PWD
-#RUN emconfigure ./configure --with-boost-include=${BOOST} --with-boost-lib=${BOOST}/lib/emscripten && \
-#	emmake make && \
-#	# emmake make install && \
-#	# ldconfig && \
-#	rm -rf ${QUANTLIB}/Examples && \
-#	mv ${QUANTLIB}/ql/.libs/libQuantLib.a /tmp && \
-#	find ${QUANTLIB}/ql -type f  ! \( -name "*.h" -o -name "*.hpp" \) -delete && \
-#	mv /tmp/libQuantLib.a ${QUANTLIB}/ql/.libs && \
-#	rm -rf /usr/local/lib/libQuant*.* 
-
+RUN emconfigure ./configure --with-boost-include=${BOOST} --with-boost-lib=${BOOST}/lib/emscripten && \
+	emmake make && \
+	# emmake make install && \
+	# ldconfig && \
+	rm -rf ${QUANTLIB}/Examples && \
+	mv ${QUANTLIB}/ql/.libs/libQuantLib.a /tmp && \
+	find ${QUANTLIB}/ql -type f  ! \( -name "*.h" -o -name "*.hpp" \) -delete && \
+	mv /tmp/libQuantLib.a ${QUANTLIB}/ql/.libs && \
+	rm -rf /usr/local/lib/libQuant*.* 
 
 # RUN apt-get clean
 
