@@ -12,17 +12,7 @@ const toWasmVector = (arr, type) => {
 
 describe("captor/quantlib", () => {
     beforeAll(async () => {
-        var loader = QuantLibModule();
-        loader.ready = () =>
-            // https://github.com/emscripten-core/emscripten/issues/5820
-            new Promise((resolve, reject) => {
-                delete loader.then;
-                loader.onAbort = reject;
-                loader.addOnPostRun(() => {
-                    resolve(loader);
-                });
-            });
-        QuantLib = await loader.ready();
+        QuantLib = await QuantLibModule();
     });
 
     test("Sweden Calendar", async () => {
