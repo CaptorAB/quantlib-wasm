@@ -1,5 +1,5 @@
 ## -*- docker-image-name: "emscripten-quantlib" -*-
-FROM emscripten/emsdk:1.39.15-upstream
+FROM emscripten/emsdk:2.0.2
 
 RUN apt-get update && \
     apt-get -y upgrade && \
@@ -64,8 +64,8 @@ RUN wget https://bintray.com/quantlib/releases/download_file?file_path=QuantLib-
 
 WORKDIR ${QUANTLIB}
 RUN echo $PWD
-RUN emconfigure ./configure --with-boost-include=${BOOST} --with-boost-lib=${BOOST}/lib/emscripten && \
-	emmake make && \
+RUN emconfigure ./configure --with-boost-include=${BOOST} --with-boost-lib=${BOOST}/lib/emscripten --disable-shared && \
+	emmake make -j4 && \
 	# emmake make install && \
 	# ldconfig && \
 	rm -rf ${QUANTLIB}/Examples && \

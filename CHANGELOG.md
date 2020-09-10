@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.19.4
+
+-   Quantlib 1.19 built with https://hub.docker.com/r/emscripten/emsdk/tags 2.0.2. Api change. Module is now a promise
+
+## 1.19.1
+
+-   Quantlib 1.19 built with https://hub.docker.com/r/emscripten/emsdk/tags 1.39.15-upstream
+
 ## 1.16.1
 
 -   Fixed build:wasm with makefile
