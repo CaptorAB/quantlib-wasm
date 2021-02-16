@@ -1,11 +1,11 @@
 {
     "name": "quantlib-wasm",
-    "version": "1.19.4",
+    "version": "1.21.1",
     "description": "A WebAssembly implementation of QuantLib for use in browser and Node.js",
     "main": "index.js",
     "scripts": {
         "test": "jest quantlib.test.js --detectOpenHandles --maxWorkers=1 --forceExit",
-        "build:wasm": "cross-var docker run -v $INIT_CWD:/src -it --rm captorab/emscripten-quantlib:1.19.4 make"
+        "build:wasm": "cross-var docker run -v $INIT_CWD:/src -it --rm captorab/emscripten-quantlib:1.21.1 make"
     },
     "repository": {
         "type": "git",

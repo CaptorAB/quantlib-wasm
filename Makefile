@@ -5,10 +5,10 @@ build_bindings:
 	emcc --bind -I${EMSCRIPTEN}/system/include -I${QUANTLIB} -I${BOOST} -O3 -s MODULARIZE=1 -s "EXTRA_EXPORTED_RUNTIME_METHODS=['addOnPostRun']" -s EXPORT_NAME=QuantLib -s TOTAL_MEMORY=64MB -o dist/quantlib.js quantlib-embind.cpp ${QUANTLIB}/ql/.libs/libQuantLib.a
 
 build_bindings_from_unix:
-	docker pull captorab/emscripten-quantlib:1.19.4
-	docker run --mount type=bind,source="${PWD}",target=/src -it captorab/emscripten-quantlib:1.19.4 make
+	docker pull captorab/emscripten-quantlib:1.21.1
+	docker run --mount type=bind,source="${PWD}",target=/src -it captorab/emscripten-quantlib:1.21.1 make
 
 
 build_docker_image:
-	docker build -t docker.io/captorab/emscripten-quantlib:1.19.4 .
-#docker push docker.io/captorab/emscripten-quantlib:1.19.4
+	docker build -t docker.io/captorab/emscripten-quantlib:1.21.1 .
+#docker push docker.io/captorab/emscripten-quantlib:1.21.1
