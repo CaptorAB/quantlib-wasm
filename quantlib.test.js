@@ -99,8 +99,6 @@ describe("captor/quantlib", () => {
     });
 
     test("Bootstrapping", async () => {
-        // Replication of
-        // http://billiontrader.com/2015/02/16/bootstrapping-with-quantlib/
         const { Date, UnitedKingdom, UnitedStates, JointCalendar, UnitedKingdomMarket, UnitedStatesMarket, JointCalendarRule } = QuantLib;
         const { TimeUnit, BusinessDayConvention, Month, setValuationDate, Actual360, QuoteHandle, Period, DepositRateHelper } = QuantLib;
         const { IMM, FuturesRateHelper, SwapRateHelper, Frequency, USDLibor, Compounding } = QuantLib;
@@ -114,7 +112,7 @@ describe("captor/quantlib", () => {
 
         var d0 = new Date(18, February, 2015);
         var settlementDate = calendar.adjust(d0, BusinessDayConvention.Following);
-        var fixingDays = 2;
+        var fixingDays = 0;
         var todaysDate = calendar.advance(settlementDate, -fixingDays, TimeUnit.Days, BusinessDayConvention.Following, false);
         setValuationDate(todaysDate);
 
@@ -194,28 +192,23 @@ describe("captor/quantlib", () => {
         var termStructureDayCounter = new Actual360();
         trashcan.push(termStructureDayCounter);
         var instrs = toWasmVector(depoFutSwapInstruments, QuantLib.Vector$RateHelper$);
-        var depoFutSwapTermStructure = new QuantLib.PiecewiseYieldCurve$Discount$Linear$(
-            settlementDate,
-            instrs,
-            termStructureDayCounter,
-            1.0e-15
-        );
+        var depoFutSwapTermStructure = new QuantLib.PiecewiseYieldCurve$Discount$Linear$(settlementDate, instrs, termStructureDayCounter);
 
         var maturities = [
             [0.1375, new Date(25, February, 2015), Simple],
             [0.1717, new Date(18, March, 2015), Simple],
             [0.2112, new Date(20, April, 2015), Simple],
             [0.2581, new Date(18, May, 2015), Simple],
-            [0.25093, new Date(17, June, 2015), Simple],
-            [0.32228, new Date(16, September, 2015), Simple],
-            [0.41111, new Date(16, December, 2015), Simple],
-            [0.51112, new Date(16, March, 2016), Simple],
-            [0.61698, new Date(15, June, 2016), Simple],
-            [0.73036, new Date(21, September, 2016), Compounded],
-            [0.89446, new Date(21, February, 2017), Compounded],
-            [1.23937, new Date(20, February, 2018), Compounded],
-            [1.49085, new Date(19, February, 2019), Compounded],
-            [1.6745, new Date(18, February, 2020), Compounded]
+            [0.2511, new Date(17, June, 2015), Simple],
+            [0.3223, new Date(16, September, 2015), Simple],
+            [0.4111, new Date(16, December, 2015), Simple],
+            [0.5113, new Date(16, March, 2016), Simple],
+            [0.6177, new Date(15, June, 2016), Simple],
+            [0.7325, new Date(21, September, 2016), Compounded],
+            [0.8911, new Date(21, February, 2017), Compounded],
+            [1.2373, new Date(20, February, 2018), Compounded],
+            [1.4884, new Date(19, February, 2019), Compounded],
+            [1.6719, new Date(18, February, 2020), Compounded]
         ];
         var log = [];
         maturities.forEach((d, i) => {
@@ -223,7 +216,7 @@ describe("captor/quantlib", () => {
             log.push(`${d[0]}: ${interestRate.toString()}`);
             interestRate.delete();
         });
-        log.push(`Discount Rate : ${depoFutSwapTermStructure.discount(maturities[13][1], false).toFixed(6)}`);
+        log.push(`Discount Rate : ${depoFutSwapTermStructure.discount(maturities[13][1], false).toFixed(4)}`);
         var forwardRate = depoFutSwapTermStructure.forwardRate(
             maturities[12][1],
             maturities[13][1],
@@ -241,22 +234,22 @@ describe("captor/quantlib", () => {
 
         trashcan.forEach((d) => d.delete());
         var result = [
-            "0.1375: 0.137499 % Actual/360 simple compounding",
-            "0.1717: 0.171700 % Actual/360 simple compounding",
-            "0.2112: 0.211200 % Actual/360 simple compounding",
-            "0.2581: 0.258100 % Actual/360 simple compounding",
-            "0.25093: 0.251098 % Actual/360 simple compounding",
-            "0.32228: 0.322259 % Actual/360 simple compounding",
-            "0.41111: 0.411112 % Actual/360 simple compounding",
-            "0.51112: 0.511346 % Actual/360 simple compounding",
-            "0.61698: 0.617716 % Actual/360 simple compounding",
-            "0.73036: 0.732486 % Actual/360 Annual compounding",
-            "0.89446: 0.890789 % Actual/360 Annual compounding",
-            "1.23937: 1.237068 % Actual/360 Annual compounding",
-            "1.49085: 1.489769 % Actual/360 Annual compounding",
-            "1.6745: 1.674417 % Actual/360 Annual compounding",
-            "Discount Rate : 0.919223",
-            "Forward Rate : 2.419765 % Actual/360 simple compounding"
+            "0.1375: 0.1375 % Actual/360 simple compounding",
+            "0.1717: 0.1717 % Actual/360 simple compounding",
+            "0.2112: 0.2112 % Actual/360 simple compounding",
+            "0.2581: 0.2581 % Actual/360 simple compounding",
+            "0.2511: 0.2511 % Actual/360 simple compounding",
+            "0.3223: 0.3223 % Actual/360 simple compounding",
+            "0.4111: 0.4111 % Actual/360 simple compounding",
+            "0.5113: 0.5113 % Actual/360 simple compounding",
+            "0.6177: 0.6177 % Actual/360 simple compounding",
+            "0.7325: 0.7325 % Actual/360 Annual compounding",
+            "0.8911: 0.8911 % Actual/360 Annual compounding",
+            "1.2373: 1.2373 % Actual/360 Annual compounding",
+            "1.4884: 1.4884 % Actual/360 Annual compounding",
+            "1.6719: 1.6719 % Actual/360 Annual compounding",
+            "Discount Rate : 0.9193",
+            "Forward Rate : 2.4125 % Actual/360 simple compounding"
         ].join("\r\n");
         expect(log.join("\r\n")).toBe(result);
     });
