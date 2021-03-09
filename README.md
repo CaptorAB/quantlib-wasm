@@ -191,3 +191,29 @@ Which objects and functions are exported? There is no documentation written yet.
 ## Versioning
 
 quantlib-wasm does not follow https://semver.org/, but the version from [Quantlib](https://www.quantlib.org/) with an extra number to version the [quantlib-wasm](https://www.npmjs.com/package/quantlib-wasm) package.
+
+## Development
+
+In order to build a new version, when a new Quantlib version is available
+
+```bash
+git checkout -b $QUANTLIB_VERSION
+```
+
+In:
+
+-   .circleci/config.yml
+-   Dockerfile
+-   Makefile
+-   package.json
+
+update from old version number to "${QUANTLIB_VERSION}"."${version}"
+
+```bash
+make build_docker_image
+make build_bindings_from_unix
+npm i
+npm test
+npm pack
+npm publish
+```

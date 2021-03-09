@@ -40,7 +40,9 @@ int main(int argc, char *argv[])
 
     Date settlementDate(18, February, 2015);
     settlementDate = calendar.adjust(settlementDate);
-    Integer fixingDays = 2;
+    // Due to Release 1.20 - October 26th, 2020: Improved calculation of spot date for vanilla swap around holidays (thanks to Paul Giltinan), 
+    // the example no longer works with 2 spot days
+    Integer fixingDays = 0;
     Date todaysDate = calendar.advance(settlementDate, -fixingDays, Days);
     Settings::instance().evaluationDate() = todaysDate;
     DayCounter depositDayCounter = Actual360();
@@ -149,7 +151,7 @@ int main(int argc, char *argv[])
 
     DayCounter termStructureDayCounter = Actual360();
     boost::shared_ptr<YieldTermStructure> depoFutSwapTermStructure(new PiecewiseYieldCurve<Discount,
-                                                                                           Linear>(settlementDate, depoFutSwapInstruments, termStructureDayCounter, 1.0e-15));
+                                                                                           Linear>(settlementDate, depoFutSwapInstruments, termStructureDayCounter));
     Date matDate1(25, February, 2015);
     Date matDate2(18, March, 2015);
     Date matDate3(20, April, 2015);
@@ -167,41 +169,27 @@ int main(int argc, char *argv[])
     Date matDate13(19, February, 2019);
     Date matDate14(18, February, 2020);
 
+    // Round output to 4 decimals
+    std::cout.precision(4);
+
     std::cout << "0.1375: " << depoFutSwapTermStructure->zeroRate(matDate1, depositDayCounter, Simple) << std::endl;
     std::cout << "0.1717: " << depoFutSwapTermStructure->zeroRate(matDate2, depositDayCounter, Simple) << std::endl;
     std::cout << "0.2112: " << depoFutSwapTermStructure->zeroRate(matDate3, depositDayCounter, Simple) << std::endl;
     std::cout << "0.2581: " << depoFutSwapTermStructure->zeroRate(matDate4, depositDayCounter, Simple) << std::endl;
 
-    std::cout << "0.25093: " << depoFutSwapTermStructure->zeroRate(matDate5, FutDayCounter, Simple) << std::endl;
-    std::cout << "0.32228: " << depoFutSwapTermStructure->zeroRate(matDate6, FutDayCounter, Simple) << std::endl;
-    std::cout << "0.41111: " << depoFutSwapTermStructure->zeroRate(matDate7, FutDayCounter, Simple) << std::endl;
-    std::cout << "0.51112: " << depoFutSwapTermStructure->zeroRate(matDate8, FutDayCounter, Simple) << std::endl;
-    std::cout << "0.61698: " << depoFutSwapTermStructure->zeroRate(matDate9, FutDayCounter, Simple) << std::endl;
+    std::cout << "0.2511: " << depoFutSwapTermStructure->zeroRate(matDate5, FutDayCounter, Simple) << std::endl;
+    std::cout << "0.3223: " << depoFutSwapTermStructure->zeroRate(matDate6, FutDayCounter, Simple) << std::endl;
+    std::cout << "0.4111: " << depoFutSwapTermStructure->zeroRate(matDate7, FutDayCounter, Simple) << std::endl;
+    std::cout << "0.5113: " << depoFutSwapTermStructure->zeroRate(matDate8, FutDayCounter, Simple) << std::endl;
+    std::cout << "0.6177: " << depoFutSwapTermStructure->zeroRate(matDate9, FutDayCounter, Simple) << std::endl;
 
-    std::cout << "0.73036: " << depoFutSwapTermStructure->zeroRate(matDate10, FutDayCounter, Compounded, Annual) << std::endl;
-    std::cout << "0.89446: " << depoFutSwapTermStructure->zeroRate(matDate11, FutDayCounter, Compounded, Annual) << std::endl;
-    std::cout << "1.23937: " << depoFutSwapTermStructure->zeroRate(matDate12, FutDayCounter, Compounded, Annual) << std::endl;
-    std::cout << "1.49085: " << depoFutSwapTermStructure->zeroRate(matDate13, FutDayCounter, Compounded, Annual) << std::endl;
-    std::cout << "1.67450: " << depoFutSwapTermStructure->zeroRate(matDate14, FutDayCounter, Compounded, Annual) << std::endl;
+    std::cout << "0.7325: " << depoFutSwapTermStructure->zeroRate(matDate10, FutDayCounter, Compounded, Annual) << std::endl;
+    std::cout << "0.8911: " << depoFutSwapTermStructure->zeroRate(matDate11, FutDayCounter, Compounded, Annual) << std::endl;
+    std::cout << "1.2373: " << depoFutSwapTermStructure->zeroRate(matDate12, FutDayCounter, Compounded, Annual) << std::endl;
+    std::cout << "1.4884: " << depoFutSwapTermStructure->zeroRate(matDate13, FutDayCounter, Compounded, Annual) << std::endl;
+    std::cout << "1.6719: " << depoFutSwapTermStructure->zeroRate(matDate14, FutDayCounter, Compounded, Annual) << std::endl;
     std::cout << "Discount Rate : " << depoFutSwapTermStructure->discount(matDate14) << std::endl;
     std::cout << "Forward Rate : " << depoFutSwapTermStructure->forwardRate(matDate13, matDate14, FutDayCounter, Simple) << std::endl;
-
-    /*
-    std::ofstream myfile;
-    myfile.open("example.txt");
-    myfile << " 24 Feb: " << depoFutSwapTermStructure->zeroRate(matDate1, termStructureDayCounter, Simple) << std::endl;
-    myfile << " 17 March: " << depoFutSwapTermStructure->zeroRate(matDate2, termStructureDayCounter, Simple) << std::endl;
-    myfile << " 17 April: " << depoFutSwapTermStructure->zeroRate(matDate3, termStructureDayCounter, Simple) << std::endl;
-    myfile << " 18 May: " << depoFutSwapTermStructure->zeroRate(matDate4, termStructureDayCounter, Simple) << std::endl;
-    myfile << " 17 june: " << depoFutSwapTermStructure->zeroRate(matDate5, termStructureDayCounter, Simple) << std::endl;
-    myfile << " 16 September: " << depoFutSwapTermStructure->zeroRate(matDate6, termStructureDayCounter, Simple) << std::endl;
-    myfile.close();
-    
-    std::cout << " Zero Rate 1 Week : " << depoFutSwapTermStructure->zeroRate(settlementDate + 1 * Weeks, termStructureDayCounter, Simple) << std::endl;
-    boost::shared_ptr<SimpleQuote> fiveYearsRate =boost::dynamic_pointer_cast<SimpleQuote>(d1wRate);
-    fiveYearsRate->setValue(0.0400);	
-    std::cout << " Zero Rate 1 Week : " << depoFutSwapTermStructure->zeroRate(settlementDate + 1 * Weeks, termStructureDayCounter, Simple) << std::endl;
-    */
 
     return 0;
 }
