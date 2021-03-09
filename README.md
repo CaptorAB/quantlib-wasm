@@ -14,16 +14,29 @@ WARNING: This is work in progress and in alpha mode.
 npm install quantlib-wasm
 ```
 
-## Usage
+## Usage with React
 
 ```js
-var QuantLib = require("quantlib-wasm");
+import quantlibWasm from "quantlib-wasm";
+import wasm from "quantlib-wasm/dist/quantlib.wasm";
 
-var loader = QuantLib();
-loader.onRuntimeInitialized = () => {
-    QuantLib = loader;
-    console.log(`QuantLib v${QuantLib.version} loaded`);
-};
+const MyReactComponent = () => {
+  const [quantLibLoaded, setQuantLibLoaded] = useState(false);
+  const [QuantLib, setQuantLib] = useState(null);
+
+  useEffect(() => {
+    if (!quantLibLoaded) {
+      quantlibWasm({
+        locateFile: (path) => (path.endsWith(".wasm") ? wasm : path),
+      }).then((loaded) => {
+        setQuantLib(loaded);
+        setQuantLibLoaded(true);
+      });
+    }
+  });
+  
+  ....
+
 ```
 
 ## Introduction
@@ -106,21 +119,6 @@ var m1 = mallinfo();
 console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd)); // Should print 0
 ```
 
-## Using the wasm in a web page
-
-When using the wasm client side, two files `quantlib.js` and `quantlib.wasm` need to be added to the web server. In the web page, e.g. index.html add the following lines of code.
-
-```html
-<script type="text/javascript" src="quantlib.js"></script>
-<script>
-    const loader = window.QuantLib();
-    var QuantLib = null;
-    loader.onRuntimeInitialized = () => {
-        QuantLib = loader;
-        console.log(`QuantLib v${QuantLib.version} loaded`);
-    };
-</script>
-```
 
 ## Using the wasm in a React app
 
@@ -143,45 +141,6 @@ Add `quantlib-wasm` to the app:
 
 ```sh
 npm install quantlib-wasm
-```
-
-Using Quantlib in a source file, e.g. index.js or and other js file.
-
-```js
-import loader from "quantlib-wasm";
-import wasm from "quantlib-wasm/dist/quantlib.wasm";
-
-const QuantLib = loader({ locateFile: (path) => (path.endsWith(".wasm") ? wasm : path) });
-
-QuantLib.onRuntimeInitialized = () => {
-    console.log(QuantLib.version);
-};
-```
-
-The WebAssembly instantiation is asynchronous. To handle this in React, the instantiation can start in the constructor of the component and the `onRuntimeInitialized` should call `this.setState`. See React [State and Lifecycle](https://reactjs.org/docs/state-and-lifecycle.html).
-
-Example: Loading the wasm in an App component.
-
-```js
-import loader from "quantlib-wasm";
-import wasm from "quantlib-wasm/dist/quantlib.wasm";
-
-class App extends React.Component {
-    constructor(props) {
-        super(props);
-        const QuantLib = loader({ locateFile: (path) => (path.endsWith(".wasm") ? wasm : path) });
-        QuantLib.onRuntimeInitialized = () => {
-            this.setState({ status: "Done!", QuantLib });
-        };
-        this.state = { status: "Loading...", QuantLib };
-    }
-    render() {
-        const { status, QuantLib } = this.state;
-        return <h2>{status + (QuantLib.version ? ` Version ${QuantLib.version} loaded` : ``)}</h2>;
-    }
-}
-
-export default App;
 ```
 
 ## Status
