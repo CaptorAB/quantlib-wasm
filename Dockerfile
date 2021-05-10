@@ -1,5 +1,5 @@
 ## -*- docker-image-name: "emscripten-quantlib" -*-
-FROM emscripten/emsdk:2.0.14
+FROM emscripten/emsdk:2.0.20
 
 RUN apt-get update && \
     apt-get -y upgrade && \
@@ -9,10 +9,10 @@ RUN apt-get update && \
 
 ENV EMSCRIPTEN /emsdk_portable/sdk
 ENV BOOST /boost
-ENV BOOST_VERSION 1.70
-ENV BOOST_UNDERSCORE_VERSION 1_70
+ENV BOOST_VERSION 1.75
+ENV BOOST_UNDERSCORE_VERSION 1_75
 ENV QUANTLIB /quantlib
-ENV QUANTLIB_VERSION 1.21
+ENV QUANTLIB_VERSION 1.22
 
 # Download and unzip Boost
 # Remove unwanted files. Keep Emscripten as is.
@@ -21,7 +21,7 @@ ENV QUANTLIB_VERSION 1.21
 # Boost
 
 WORKDIR /tmp
-RUN wget -c https://dl.bintray.com/boostorg/release/${BOOST_VERSION}.0/source/boost_${BOOST_UNDERSCORE_VERSION}_0.tar.bz2 && \
+RUN wget -c https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}.0/source/boost_${BOOST_UNDERSCORE_VERSION}_0.tar.bz2 && \
     mkdir ${BOOST} && \
     tar --bzip2 -xf boost_${BOOST_UNDERSCORE_VERSION}_0.tar.bz2 -C ${BOOST} --strip-components=1 && \
     rm -f boost_${BOOST_UNDERSCORE_VERSION}_0.tar.bz2 && \
@@ -50,7 +50,7 @@ RUN ./bootstrap.sh && rm -rf stage && \
 # QuantLib
 
 WORKDIR /tmp
-RUN wget https://bintray.com/quantlib/releases/download_file?file_path=QuantLib-${QUANTLIB_VERSION}.tar.gz -O QuantLib-${QUANTLIB_VERSION}.tar.gz && \
+RUN wget https://github.com/lballabio/QuantLib/releases/download/QuantLib-v${QUANTLIB_VERSION}/QuantLib-${QUANTLIB_VERSION}.tar.gz -O QuantLib-${QUANTLIB_VERSION}.tar.gz && \
 	mkdir ${QUANTLIB} && \
 	tar xzf QuantLib-${QUANTLIB_VERSION}.tar.gz -C ${QUANTLIB} --strip-components=1 && \
 	rm -f QuantLib-${QUANTLIB_VERSION}.tar.gz 
