@@ -1,5 +1,17 @@
 # Changelog
 
+
+## 1.22.1
+
+- Quantlib 1.22 built with https://hub.docker.com/r/emscripten/emsdk/tags.
+
+
+## 1.21.1
+
+- Quantlib 1.21 built with https://hub.docker.com/r/emscripten/emsdk/tags.
+
+
+
 ## 1.19.4
 
 -   Quantlib 1.19 built with https://hub.docker.com/r/emscripten/emsdk/tags 2.0.2. Api change. Module is now a promise
