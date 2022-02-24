@@ -1,5 +1,5 @@
 ## -*- docker-image-name: "emscripten-quantlib" -*-
-FROM emscripten/emsdk:2.0.20
+FROM emscripten/emsdk:3.1.1
 
 RUN apt-get update && \
     apt-get -y upgrade && \
@@ -12,7 +12,7 @@ ENV BOOST /boost
 ENV BOOST_VERSION 1.75
 ENV BOOST_UNDERSCORE_VERSION 1_75
 ENV QUANTLIB /quantlib
-ENV QUANTLIB_VERSION 1.22
+ENV QUANTLIB_VERSION 1.25
 
 # Download and unzip Boost
 # Remove unwanted files. Keep Emscripten as is.
