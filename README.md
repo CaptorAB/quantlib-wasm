@@ -8,6 +8,8 @@ A wrapper of the quantitative finance library [Quantlib](https://www.quantlib.or
 
 WARNING: This is work in progress and in alpha mode.
 
+A live example of quantlib running in the browser can be seen here https://captorab.github.io/quantlib-wasm-demo/
+
 ## Install
 
 ```bash
