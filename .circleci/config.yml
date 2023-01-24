@@ -2,7 +2,7 @@ version: 2
 jobs:
     build:
         docker:
-            - image: captorab/emscripten-quantlib:1.25.1
+            - image: captorab/emscripten-quantlib:1.29.1
 
         working_directory: ~/repo
 
