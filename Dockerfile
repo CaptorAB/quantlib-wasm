@@ -1,18 +1,20 @@
 ## -*- docker-image-name: "emscripten-quantlib" -*-
-FROM emscripten/emsdk:3.1.1
-
-RUN apt-get update && \
-    apt-get -y upgrade && \
-    apt-get -y install automake autoconf libtool && \
-    apt-get autoclean && \
-    apt-get clean
+FROM emscripten/emsdk:3.1.30
 
 ENV EMSCRIPTEN /emsdk_portable/sdk
 ENV BOOST /boost
 ENV BOOST_VERSION 1.75
 ENV BOOST_UNDERSCORE_VERSION 1_75
 ENV QUANTLIB /quantlib
-ENV QUANTLIB_VERSION 1.25
+ENV QUANTLIB_VERSION 1.29
+
+RUN apt-get update && \
+        apt-get -y upgrade && \
+        apt-get -y install software-properties-common  && \
+        add-apt-repository ppa:edd/misc && \
+        apt-get update  && \
+        apt-get -y install ng-cjk automake autoconf libtool libboost-dev libquantlib0-dev=${QUANTLIB_VERSION}-1.2204.1
+
 
 # Download and unzip Boost
 # Remove unwanted files. Keep Emscripten as is.
@@ -66,15 +68,12 @@ WORKDIR ${QUANTLIB}
 RUN echo $PWD
 RUN emconfigure ./configure --with-boost-include=${BOOST} --with-boost-lib=${BOOST}/lib/emscripten --disable-shared && \
 	emmake make -j4 && \
-	# emmake make install && \
-	# ldconfig && \
 	rm -rf ${QUANTLIB}/Examples && \
 	mv ${QUANTLIB}/ql/.libs/libQuantLib.a /tmp && \
 	find ${QUANTLIB}/ql -type f  ! \( -name "*.h" -o -name "*.hpp" \) -delete && \
 	mv /tmp/libQuantLib.a ${QUANTLIB}/ql/.libs && \
 	rm -rf /usr/local/lib/libQuant*.* 
 
-# RUN apt-get clean
 
 WORKDIR /src
 CMD ["/bin/bash"]
