@@ -36,7 +36,7 @@ const MyReactComponent = () => {
       });
     }
   });
-  
+
   ....
 
 ```
@@ -121,7 +121,6 @@ var m1 = mallinfo();
 console.log(m1.uordblks - m0.uordblks + (m1.hblkhd - m0.hblkhd)); // Should print 0
 ```
 
-
 ## Using the wasm in a React app
 
 React in itself can easily use the Quantlib wasm. See the method above. When the app is build with `create-react-app`, webpack is used to load and build the source files. By default (version 3.1.1 or earlier of `react-scripts`), doesn't load wasm files. To bypass this problem Facebook's `react-scripts` can be forked and modified. How this is done is explained [here](https://auth0.com/blog/how-to-configure-create-react-app/).
@@ -178,4 +177,3 @@ npm test
 npm pack
 npm publish
 ```
-
