@@ -18,24 +18,25 @@ npm install quantlib-wasm
 
 ## Usage with React
 
-```js
+```typescript
+import wasmUrl from "quantlib-wasm/dist/quantlib.wasm?url";
 import quantlibWasm from "quantlib-wasm";
-import wasm from "quantlib-wasm/dist/quantlib.wasm";
+
 
 const MyReactComponent = () => {
-  const [quantLibLoaded, setQuantLibLoaded] = useState(false);
-  const [QuantLib, setQuantLib] = useState(null);
+    const [quantLibLoaded, setQuantLibLoaded] = useState(false);
+    const [QuantLib, setQuantLib] = useState(null);
 
-  useEffect(() => {
-    if (!quantLibLoaded) {
-      quantlibWasm({
-        locateFile: (path) => (path.endsWith(".wasm") ? wasm : path),
-      }).then((loaded) => {
-        setQuantLib(loaded);
-        setQuantLibLoaded(true);
-      });
-    }
-  });
+    useEffect(() => {
+        if (!quantLibLoaded) {
+            quantlibWasm({
+                locateFile: () => wasmUrl,
+            }).then((loaded) => {
+                setQuantLib(loaded);
+                setQuantLibLoaded(true);
+            });
+        }
+    });
 
   ....
 
