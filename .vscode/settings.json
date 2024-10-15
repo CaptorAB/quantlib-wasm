@@ -105,5 +105,6 @@
         "unordered_set": "cpp",
         "variant": "cpp",
         "coroutine": "cpp"
-    }
+    },
+    "makefile.configureOnOpen": false
 }

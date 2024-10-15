@@ -1,5 +1,5 @@
 ## -*- docker-image-name: "emscripten-quantlib" -*-
-FROM emscripten/emsdk:3.1.64
+FROM emscripten/emsdk:3.1.69
 
 ENV EMSCRIPTEN /emsdk_portable/sdk
 
@@ -23,8 +23,8 @@ RUN cat /etc/*-release
 #RUN apt-get -y install libquantlib0-dev=${QUANTLIB_VERSION}-1.2204.1 libtool libboost-dev
 
 ENV BOOST /boost
-ENV BOOST_VERSION 1.85
-ENV BOOST_UNDERSCORE_VERSION 1_85
+ENV BOOST_VERSION 1.86
+ENV BOOST_UNDERSCORE_VERSION 1_86
 # Download and unzip Boost
 # Remove unwanted files. Keep Emscripten as is.
 # Keep Boost and QuantLib header files and lib files.
@@ -70,7 +70,7 @@ RUN ./bootstrap.sh && rm -rf stage && \
 # QuantLib
 ENV QUANTLIB /quantlib
 ENV QUANTLIB_NATIVE /quantlib_native 
-ENV QUANTLIB_VERSION 1.35
+ENV QUANTLIB_VERSION 1.36
 
 WORKDIR /tmp
 RUN wget https://github.com/lballabio/QuantLib/releases/download/v${QUANTLIB_VERSION}/QuantLib-${QUANTLIB_VERSION}.tar.gz -O QuantLib-${QUANTLIB_VERSION}.tar.gz && \
@@ -86,8 +86,9 @@ RUN wget https://github.com/lballabio/QuantLib/releases/download/v${QUANTLIB_VER
 
 WORKDIR ${QUANTLIB}
 RUN echo $PWD
+RUN autoreconf --force
 # --enable-test-suite=no since it takes to much memory to link
-RUN emconfigure ./configure --with-boost-include=${BOOST} --with-boost-lib=${BOOST}/lib/emscripten --disable-shared --enable-test-suite=no
+RUN emconfigure ./configure --with-boost-include=${BOOST} --with-boost-lib=${BOOST}/lib/emscripten --disable-shared --enable-test-suite=no --disable-dependency-tracking
 RUN	emmake make -j1 && \
 	rm -rf ${QUANTLIB}/Examples && \
 	mv ${QUANTLIB}/ql/.libs/libQuantLib.a /tmp && \
@@ -104,8 +105,8 @@ RUN	emmake make -j1 && \
 # Compiling nativly should be last, since else /usr/local/lib/libQuantLib.so is lost 
 WORKDIR ${QUANTLIB_NATIVE}
 RUN autoreconf --force
-RUN ./configure --enable-test-suite=no
-RUN make -j4 && \
+RUN ./configure --enable-test-suite=no  --disable-dependency-tracking
+RUN make -j1 && \
 	make install && \
 	ldconfig && \
 	cd / && rm -rf ${QUANTLIB_NATIVE}
